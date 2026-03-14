@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -eEo pipefail
+source "$(dirname "$0")/foundationos-env"
+
+cat <<EOF
+FoundationOS Client Status
+- foundation base url: $FOUNDATION_BASE_URL
+- foundation api url: $FOUNDATION_API_BASE_URL
+- config path: $FOUNDATIONOS_CONFIG
+- desktop scheme: $FOUNDATION_DESKTOP_SCHEME
+- next step: implement device registration, FreeIPA join verification, and desktop-agent status checks
+EOF

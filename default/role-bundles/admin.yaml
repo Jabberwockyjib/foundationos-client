@@ -1,0 +1,16 @@
+bundle_id: admin
+display_name: Admin
+foundation_shortcuts:
+  - pulse
+  - chat
+  - approvals
+  - diagnostics
+workspaces:
+  - admin
+  - monitoring
+  - browser
+apps:
+  - firefox
+  - chromium
+  - thunderbird
+  - libreoffice

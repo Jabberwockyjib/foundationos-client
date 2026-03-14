@@ -1,0 +1,14 @@
+bundle_id: executive
+display_name: Executive
+foundation_shortcuts:
+  - pulse
+  - chat
+  - approvals
+workspaces:
+  - briefing
+  - approvals
+  - browser
+apps:
+  - firefox
+  - chromium
+  - thunderbird

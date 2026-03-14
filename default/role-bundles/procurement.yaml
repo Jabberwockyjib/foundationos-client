@@ -1,0 +1,15 @@
+bundle_id: procurement
+display_name: Procurement
+foundation_shortcuts:
+  - pulse
+  - approvals
+  - workflows
+workspaces:
+  - procurement
+  - erpnext
+  - communication
+apps:
+  - firefox
+  - chromium
+  - thunderbird
+  - libreoffice

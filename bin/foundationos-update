@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -eEo pipefail
+source "$(dirname "$0")/foundationos-env"
+
+echo "TODO: implement channel-aware update flow with snapshot-before-update and rollback support."

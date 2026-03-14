@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -eEo pipefail
+
+export FOUNDATIONOS_ROOT="${FOUNDATIONOS_ROOT:-$HOME/.local/share/foundationos}"
+export FOUNDATIONOS_CONFIG="${FOUNDATIONOS_CONFIG:-$HOME/.config/foundationos/foundationos.conf}"
+export FOUNDATION_BASE_URL="${FOUNDATION_BASE_URL:-http://localhost:5173}"
+export FOUNDATION_API_BASE_URL="${FOUNDATION_API_BASE_URL:-http://localhost:4000}"
+export FOUNDATION_DESKTOP_SCHEME="${FOUNDATION_DESKTOP_SCHEME:-sndfoundation://desktop}"

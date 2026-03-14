@@ -1,0 +1,15 @@
+bundle_id: finance
+display_name: Finance
+foundation_shortcuts:
+  - pulse
+  - approvals
+  - chat
+workspaces:
+  - finance
+  - reporting
+  - browser
+apps:
+  - firefox
+  - chromium
+  - thunderbird
+  - libreoffice

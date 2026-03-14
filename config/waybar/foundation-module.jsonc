@@ -1,0 +1,13 @@
+{
+  "layer": "top",
+  "position": "top",
+  "modules-right": ["custom/foundation"],
+  "custom/foundation": {
+    "format": "FOUNDATION",
+    "tooltip": true,
+    "on-click": "foundationos-launch-foundation",
+    "on-click-right": "foundationos-status",
+    "return-type": "json",
+    "exec": "printf '{\"text\":\"FOUNDATION\",\"tooltip\":\"Open Foundation and inspect desktop status\"}'"
+  }
+}

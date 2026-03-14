@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -eEo pipefail
+source "$(dirname "$0")/foundationos-env"
+
+query="${1:-}"
+
+if [[ -z $query ]]; then
+  echo "usage: foundationos-search <query>"
+  exit 1
+fi
+
+echo "TODO: route launcher search through the Foundation desktop agent or Foundation search API."
+echo "Query: $query"
+echo "API: $FOUNDATION_API_BASE_URL"

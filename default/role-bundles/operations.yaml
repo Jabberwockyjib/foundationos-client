@@ -1,0 +1,16 @@
+bundle_id: operations
+display_name: Operations
+foundation_shortcuts:
+  - pulse
+  - chat
+  - flows
+  - approvals
+workspaces:
+  - pulse
+  - erpnext
+  - communication
+apps:
+  - firefox
+  - chromium
+  - thunderbird
+  - libreoffice

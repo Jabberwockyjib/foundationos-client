@@ -1,0 +1,10 @@
+*.log
+dist/
+build/
+tmp/
+.DS_Store
+.env
+.env.local
+.cache/
+artifacts/
+release/

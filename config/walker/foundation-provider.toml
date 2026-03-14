@@ -1,0 +1,7 @@
+[provider]
+name = "foundation"
+placeholder = "Search Foundation"
+command = "foundationos-search"
+
+[behavior]
+close_on_select = true
