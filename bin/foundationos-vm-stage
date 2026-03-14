@@ -1,0 +1,87 @@
+#!/bin/bash
+
+set -eEo pipefail
+source "$(dirname "$0")/foundationos-env"
+
+target_dir="${FOUNDATIONOS_VM_TARGET:-$HOME/.local/share/foundationos-vm}"
+upstream_repo="https://github.com/basecamp/omarchy.git"
+upstream_ref="$FOUNDATIONOS_UPSTREAM_BRANCH"
+from_local=""
+run_install=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --target)
+      target_dir="$2"
+      shift 2
+      ;;
+    --upstream-repo)
+      upstream_repo="$2"
+      shift 2
+      ;;
+    --upstream-ref)
+      upstream_ref="$2"
+      shift 2
+      ;;
+    --from-local)
+      from_local="$2"
+      shift 2
+      ;;
+    --run-install)
+      run_install=true
+      shift
+      ;;
+    *)
+      foundationos::die "Unknown argument: $1"
+      ;;
+  esac
+done
+
+if ! foundationos::has_cmd git; then
+  foundationos::die "git is required to stage an Omarchy-based VM tree."
+fi
+
+if ! foundationos::has_cmd rsync; then
+  foundationos::die "rsync is required to stage an Omarchy-based VM tree."
+fi
+
+if [[ -d $target_dir/.git ]]; then
+  foundationos::log "Refreshing existing VM staging tree at $target_dir"
+  git -C "$target_dir" fetch origin "$upstream_ref" || true
+  git -C "$target_dir" checkout "$upstream_ref" || true
+  git -C "$target_dir" pull --ff-only || true
+else
+  rm -rf "$target_dir"
+  if [[ -n $from_local ]]; then
+    foundationos::log "Cloning local upstream checkout from $from_local"
+    git clone --branch "$upstream_ref" "$from_local" "$target_dir"
+  else
+    foundationos::log "Cloning upstream Omarchy from $upstream_repo"
+    git clone --depth 1 --branch "$upstream_ref" "$upstream_repo" "$target_dir"
+  fi
+fi
+
+for stage in preflight packaging config login post-install; do
+  upstream_all="$target_dir/install/$stage/all.sh"
+  backup_all="$target_dir/install/$stage/upstream.sh"
+
+  if [[ -f $upstream_all && ! -f $backup_all ]]; then
+    cp "$upstream_all" "$backup_all"
+  fi
+done
+
+rsync -a --exclude='.git' "$FOUNDATIONOS_ROOT"/ "$target_dir"/
+
+cat > "$target_dir/.foundationos-overlay" <<EOF
+FOUNDATIONOS_SOURCE_ROOT=$FOUNDATIONOS_ROOT
+FOUNDATIONOS_OVERLAY_APPLIED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+FOUNDATIONOS_UPSTREAM_REPO=$upstream_repo
+FOUNDATIONOS_UPSTREAM_REF=$upstream_ref
+EOF
+
+foundationos::log "FoundationOS VM tree staged at $target_dir"
+foundationos::info "Run FOUNDATIONOS_ROOT=$target_dir FOUNDATIONOS_PATH=$target_dir bash $target_dir/install.sh inside an Arch VM."
+
+if [[ $run_install == true ]]; then
+  FOUNDATIONOS_ROOT="$target_dir" FOUNDATIONOS_PATH="$target_dir" bash "$target_dir/install.sh"
+fi

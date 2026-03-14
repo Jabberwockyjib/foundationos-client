@@ -10,6 +10,7 @@
 6. publish the desktop-agent artifact and the `FreeIPA` enrollment secret flow
 7. validate `foundationos-update plan` and `foundationos-rollback`
 8. cut the first image manifest from `manifests/images/internal-pilot.yaml`
+9. for VM proving, run `foundationos-vm-stage --target ~/.local/share/foundationos-vm`
 
 ## Required Outputs
 

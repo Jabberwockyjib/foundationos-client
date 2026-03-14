@@ -42,6 +42,7 @@ It is a starting structure, not a complete desktop product.
 
 - shared runtime library in `lib/foundationos.sh`
 - executable enrollment, agent, update, rollback, and diagnostics commands in `bin/`
+- `foundationos-vm-stage` for generating a runnable Omarchy-plus-FoundationOS VM tree
 - package manifests and install phases aligned with Omarchy's `install/packaging/` shape
 - role-bundle mapping and richer bundle manifests tied to `FreeIPA` groups
 - staged `Waybar`, launcher, protocol-handler, and desktop-agent service assets
@@ -55,6 +56,15 @@ It is a starting structure, not a complete desktop product.
 4. merge the staged `Waybar` and launcher assets into the active Omarchy configs
 5. validate `foundationos-enroll` on a real pilot workstation
 6. publish the first signed image and update manifests
+
+## VM Status
+
+The repo can now stage a runnable test tree for an Arch VM by cloning upstream Omarchy and overlaying the FoundationOS fork-owned files.
+
+- use `foundationos-vm-stage --target ~/.local/share/foundationos-vm`
+- run the generated tree's `install.sh` inside the VM
+- expect shell, agent, and enrollment scaffolding to come up
+- expect real identity enrollment and agent registration to remain blocked until the external artifacts exist
 
 ## Required External Inputs
 
