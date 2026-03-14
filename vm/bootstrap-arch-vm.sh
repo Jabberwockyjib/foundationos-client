@@ -17,22 +17,27 @@ if ! command -v pacman >/dev/null 2>&1; then
   exit 1
 fi
 
-repo_dir="${1:-$HOME/sndfoundation}"
-client_dir="$repo_dir/foundationos-client"
+script_dir="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+script_repo_dir="$(cd -- "$script_dir/.." && pwd)"
+repo_dir="${1:-$script_repo_dir}"
+
+if [[ -x $repo_dir/bin/foundationos-vm-stage ]]; then
+  client_dir="$repo_dir"
+elif [[ -x $repo_dir/foundationos-client/bin/foundationos-vm-stage ]]; then
+  client_dir="$repo_dir/foundationos-client"
+else
+  echo "FoundationOS client checkout not found under $repo_dir" >&2
+  exit 1
+fi
+
 target_dir="${FOUNDATIONOS_VM_TARGET:-$HOME/.local/share/foundationos-vm}"
 
 sudo pacman -Syu --noconfirm --needed git rsync jq curl base-devel networkmanager
 sudo systemctl enable --now NetworkManager
 
-if [[ ! -d $repo_dir/.git ]]; then
+if [[ ! -d $client_dir/.git && ! -f $client_dir/README.md ]]; then
   echo "Expected repo checkout at $repo_dir" >&2
-  echo "Clone your repo first, then rerun:" >&2
-  echo "  git clone <repo-url> $repo_dir" >&2
-  exit 1
-fi
-
-if [[ ! -x $client_dir/bin/foundationos-vm-stage ]]; then
-  echo "FoundationOS client checkout not found at $client_dir" >&2
+  echo "Clone the FoundationOS client repo first, then rerun." >&2
   exit 1
 fi
 

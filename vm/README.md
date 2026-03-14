@@ -7,11 +7,12 @@ Create a runnable FoundationOS test tree by overlaying this repo onto an `Omarch
 ## Fast Path
 
 1. boot a clean Arch VM with network access
-2. clone this repo or copy `foundationos-client/` into the VM
-3. run `vm/bootstrap-arch-vm.sh`
-4. if you want manual staging instead, run `foundationos-vm-stage --target ~/.local/share/foundationos-vm`
-5. then run `FOUNDATIONOS_ROOT=~/.local/share/foundationos-vm FOUNDATIONOS_PATH=~/.local/share/foundationos-vm bash ~/.local/share/foundationos-vm/install.sh`
-6. validate with `foundationos-status`, `foundationos-update plan`, and `foundationos-enroll --stage-only`
+2. clone the standalone public repo or copy `foundationos-client/` into the VM
+3. for the public repo, use `git clone https://github.com/Jabberwockyjib/foundationos-client ~/foundationos-client`
+4. run `vm/bootstrap-arch-vm.sh`
+5. if you want manual staging instead, run `foundationos-vm-stage --target ~/.local/share/foundationos-vm`
+6. then run `FOUNDATIONOS_ROOT=~/.local/share/foundationos-vm FOUNDATIONOS_PATH=~/.local/share/foundationos-vm bash ~/.local/share/foundationos-vm/install.sh`
+7. validate with `foundationos-status`, `foundationos-update plan`, and `foundationos-enroll --stage-only`
 
 ## Why This Works
 
