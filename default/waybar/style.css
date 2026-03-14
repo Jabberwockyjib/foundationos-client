@@ -1,3 +1,13 @@
+#custom-foundationos-menu {
+  min-width: 22px;
+  margin-right: 10px;
+  padding: 0 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #e8e4d7;
+  background: rgba(71, 88, 57, 0.78);
+}
+
 #custom-foundation.foundation-ok {
   color: #d4e2d4;
   background: rgba(42, 74, 52, 0.82);

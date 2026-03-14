@@ -26,31 +26,54 @@ prompt_menu() {
 
 selection="$(
   printf '%s\n' \
-    "Open Pulse" \
-    "Open Chat" \
-    "Open Approvals" \
-    "Open Flows" \
-    "Search FoundationOS" \
+    "Foundation Launcher" \
+    "Foundation Pulse" \
+    "Foundation Chat" \
+    "Foundation Approvals" \
+    "Foundation Flows" \
+    "Application Launcher" \
+    "Setup" \
+    "Style" \
+    "System" \
+    "Update Plan" \
     "Diagnostics" \
     | prompt_menu "FoundationOS"
 )"
 
 case "$selection" in
-  "Open Pulse")
+  "Foundation Launcher")
+    "$FOUNDATIONOS_ROOT/bin/foundationos-launcher"
+    ;;
+  "Foundation Pulse")
     "$FOUNDATIONOS_ROOT/bin/foundationos-open-link" foundation://pulse
     ;;
-  "Open Chat")
+  "Foundation Chat")
     "$FOUNDATIONOS_ROOT/bin/foundationos-open-link" foundation://chat
     ;;
-  "Open Approvals")
+  "Foundation Approvals")
     "$FOUNDATIONOS_ROOT/bin/foundationos-open-link" foundation://approvals
     ;;
-  "Open Flows")
+  "Foundation Flows")
     "$FOUNDATIONOS_ROOT/bin/foundationos-open-link" foundation://flows
     ;;
-  "Search FoundationOS")
-    query="$(printf '' | prompt_menu "FoundationOS search")"
-    [[ -n $query ]] && "$FOUNDATIONOS_ROOT/bin/foundationos-search" --open-first "$query"
+  "Application Launcher")
+    if foundationos::has_cmd omarchy-launch-walker; then
+      omarchy-launch-walker -p "Launch…"
+    else
+      "$FOUNDATIONOS_ROOT/bin/foundationos-launcher"
+    fi
+    ;;
+  "Setup")
+    foundationos::has_cmd omarchy-menu && omarchy-menu setup
+    ;;
+  "Style")
+    foundationos::has_cmd omarchy-menu && omarchy-menu style
+    ;;
+  "System")
+    foundationos::has_cmd omarchy-menu && omarchy-menu system
+    ;;
+  "Update Plan")
+    foundationos::launch_terminal "foundationos-update plan; printf '\nPress Enter to close...'; read -r _"
     ;;
   "Diagnostics")
     foundationos::launch_terminal "foundationos-diagnostics; printf '\nPress Enter to close...'; read -r _"
@@ -58,6 +81,6 @@ case "$selection" in
   "")
     ;;
   *)
-    foundationos::warn "Unhandled launcher selection: $selection"
+    foundationos::warn "Unhandled FoundationOS menu selection: $selection"
     ;;
 esac

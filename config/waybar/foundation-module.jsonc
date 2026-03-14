@@ -1,10 +1,16 @@
 {
+  "custom/foundationos-menu": {
+    "format": "2F",
+    "on-click": "foundationos-menu",
+    "on-click-right": "xdg-terminal-exec",
+    "tooltip-format": "FoundationOS Menu\n\nSuper + Alt + Space"
+  },
   "custom/foundation": {
     "format": "{}",
     "tooltip": true,
     "on-click": "foundationos-launcher",
     "on-click-middle": "foundationos-launch-foundation pulse",
-    "on-click-right": "foundationos-launcher",
+    "on-click-right": "xdg-terminal-exec bash -lc 'foundationos-diagnostics; printf \"\\nPress Enter to close...\"; read -r _'",
     "return-type": "json",
     "exec": "foundationos-waybar",
     "interval": 30

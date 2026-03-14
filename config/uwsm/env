@@ -1,0 +1,15 @@
+# Changes require a restart to take effect.
+
+export FOUNDATIONOS_PATH="${FOUNDATIONOS_PATH:-$HOME/.local/share/foundationos}"
+export OMARCHY_PATH="${OMARCHY_PATH:-$HOME/.local/share/omarchy}"
+
+if [[ -f ~/.config/foundationos/session.env ]]; then
+  # shellcheck disable=SC1090
+  source ~/.config/foundationos/session.env
+fi
+
+export PATH="$FOUNDATIONOS_PATH/bin:$OMARCHY_PATH/bin:$PATH:$HOME/.local/bin"
+
+source ~/.config/uwsm/default
+
+omarchy-cmd-present mise && eval "$(mise activate bash --shims)"

@@ -6,7 +6,7 @@ source "$(dirname "$0")/foundationos-env"
 bundle="$(foundationos::role_bundle_from_groups)"
 bundle_path="$(foundationos::role_bundle_path "$bundle")"
 bundle_label="$bundle"
-text="FND"
+text="2F"
 state_class="foundation-warn"
 tooltip_lines=()
 
@@ -22,7 +22,7 @@ if foundationos::foundation_healthcheck; then
   state_class="foundation-ok"
 else
   tooltip_lines+=("Foundation API: offline")
-  text="FND?"
+  text="2F?"
   state_class="foundation-warn"
 fi
 
@@ -30,7 +30,7 @@ if foundationos::agent_service_active; then
   tooltip_lines+=("Desktop agent: active")
 else
   tooltip_lines+=("Desktop agent: inactive")
-  text="FND!"
+  text="2F!"
   state_class="foundation-error"
 fi
 
