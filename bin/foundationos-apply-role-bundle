@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -eEo pipefail
+source "$(dirname "$0")/foundationos-env"
+
+bundle="${1:-$(foundationos::role_bundle_from_groups)}"
+bundle_path="$(foundationos::role_bundle_path "$bundle")"
+bundle_label=""
+bundle_group=""
+foundation_role=""
+workspaces=""
+apps=""
+shortcuts=""
+
+[[ -f $bundle_path ]] || foundationos::die "Role bundle not found: $bundle"
+
+bundle_label="$(foundationos::read_bundle_scalar display_name "$bundle_path")"
+bundle_group="$(foundationos::read_bundle_scalar freeipa_group "$bundle_path")"
+foundation_role="$(foundationos::read_bundle_scalar foundation_role "$bundle_path")"
+workspaces="$(foundationos::read_bundle_list workspaces "$bundle_path" | paste -sd, -)"
+apps="$(foundationos::read_bundle_list apps "$bundle_path" | paste -sd, -)"
+shortcuts="$(foundationos::read_bundle_list foundation_shortcuts "$bundle_path" | paste -sd, -)"
+
+install -m 0644 "$bundle_path" "$FOUNDATIONOS_STATE_DIR/active-role-bundle.yaml"
+
+{
+  printf 'FOUNDATIONOS_ACTIVE_ROLE_BUNDLE=%q\n' "$bundle"
+  printf 'FOUNDATIONOS_ACTIVE_ROLE_LABEL=%q\n' "$bundle_label"
+  printf 'FOUNDATIONOS_ACTIVE_FREEIPA_GROUP=%q\n' "$bundle_group"
+  printf 'FOUNDATIONOS_ACTIVE_FOUNDATION_ROLE=%q\n' "$foundation_role"
+  printf 'FOUNDATIONOS_ACTIVE_WORKSPACES=%q\n' "$workspaces"
+  printf 'FOUNDATIONOS_ACTIVE_APPS=%q\n' "$apps"
+  printf 'FOUNDATIONOS_ACTIVE_SHORTCUTS=%q\n' "$shortcuts"
+} > "$FOUNDATIONOS_ROLE_BUNDLE_STATE"
+
+foundationos::log "Applied role bundle $bundle (${bundle_label:-$bundle})"

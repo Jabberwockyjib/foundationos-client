@@ -1,9 +1,21 @@
+schema_version: v1
 bundle_id: executive
 display_name: Executive
+freeipa_group: fnd-owner-gm
+foundation_role: executive_approver
+erp_bundle: erp_exec_read
+desktop_bundle: desktop_exec
 foundation_shortcuts:
   - pulse
   - chat
   - approvals
+launcher_entries:
+  - foundation-launcher.desktop
+  - foundation-pulse.desktop
+  - foundation-chat.desktop
+  - foundation-approvals.desktop
+waybar_modules:
+  - custom/foundation
 workspaces:
   - briefing
   - approvals

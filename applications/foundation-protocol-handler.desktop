@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Foundation Protocol Handler
+Comment=Handle Foundation deep links
+Exec=foundationos-open-link %u
+Terminal=false
+Type=Application
+NoDisplay=true
+MimeType=x-scheme-handler/foundation;x-scheme-handler/sndfoundation;

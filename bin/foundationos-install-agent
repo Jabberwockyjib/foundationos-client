@@ -1,0 +1,68 @@
+#!/bin/bash
+
+set -eEo pipefail
+source "$(dirname "$0")/foundationos-env"
+
+stage_only=false
+enable_service=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --stage-only)
+      stage_only=true
+      shift
+      ;;
+    --enable)
+      enable_service=true
+      shift
+      ;;
+    *)
+      foundationos::die "Unknown argument: $1"
+      ;;
+  esac
+done
+
+mkdir -p "$HOME/.config/systemd/user" "$FOUNDATIONOS_CONFIG_DIR"
+install -m 0644 \
+  "$FOUNDATIONOS_ROOT/config/systemd/user/foundation-desktop-agent.service" \
+  "$HOME/.config/systemd/user/$FOUNDATION_AGENT_SERVICE"
+
+{
+  printf 'FOUNDATION_AGENT_BINARY=%q\n' "$FOUNDATION_AGENT_BINARY"
+  printf 'FOUNDATION_AGENT_API_BASE_URL=%q\n' "$FOUNDATION_AGENT_API_BASE_URL"
+  printf 'FOUNDATION_AGENT_HEALTH_PATH=%q\n' "$FOUNDATION_AGENT_HEALTH_PATH"
+  printf 'FOUNDATION_AGENT_OPEN_PATH=%q\n' "$FOUNDATION_AGENT_OPEN_PATH"
+} > "$FOUNDATIONOS_CONFIG_DIR/agent.env"
+
+case "$FOUNDATION_AGENT_PACKAGE_MODE" in
+  pacman)
+    if [[ $stage_only == false ]] && foundationos::has_cmd pacman; then
+      sudo pacman -S --noconfirm --needed "$FOUNDATION_AGENT_PACKAGE"
+    fi
+    ;;
+  skip)
+    foundationos::warn "Desktop agent package install is skipped. Set FOUNDATION_AGENT_PACKAGE_MODE=pacman when a package source exists."
+    ;;
+  aur|artifact)
+    foundationos::warn "Desktop agent package mode '$FOUNDATION_AGENT_PACKAGE_MODE' requires an external artifact flow that is not available in this repo yet."
+    ;;
+  *)
+    foundationos::warn "Unknown desktop agent package mode '$FOUNDATION_AGENT_PACKAGE_MODE'."
+    ;;
+esac
+
+if foundationos::has_cmd systemctl; then
+  systemctl --user daemon-reload || true
+fi
+
+if [[ $stage_only == false ]]; then
+  if [[ $enable_service == true || $(foundationos::agent_binary_present && echo yes || echo no) == yes ]]; then
+    if foundationos::has_cmd systemctl; then
+      systemctl --user enable --now "$FOUNDATION_AGENT_SERVICE" || foundationos::warn "Unable to enable $FOUNDATION_AGENT_SERVICE yet."
+    else
+      foundationos::warn "systemctl is not available. Start the desktop agent manually after package install."
+    fi
+  fi
+fi
+
+foundationos::log "Desktop agent unit staged at $HOME/.config/systemd/user/$FOUNDATION_AGENT_SERVICE"

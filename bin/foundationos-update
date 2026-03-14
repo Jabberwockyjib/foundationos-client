@@ -3,4 +3,70 @@
 set -eEo pipefail
 source "$(dirname "$0")/foundationos-env"
 
-echo "TODO: implement channel-aware update flow with snapshot-before-update and rollback support."
+command="${1:-plan}"
+with_system=false
+manifest_path="$FOUNDATIONOS_ROOT/manifests/updates/$FOUNDATIONOS_CHANNEL.yaml"
+
+shift || true
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --with-system)
+      with_system=true
+      shift
+      ;;
+    *)
+      foundationos::die "Unknown argument: $1"
+      ;;
+  esac
+done
+
+case "$command" in
+  plan|status)
+    cat <<EOF
+FoundationOS Update Plan
+- channel: $FOUNDATIONOS_CHANNEL
+- release id: $FOUNDATIONOS_RELEASE_ID
+- update manifest: $manifest_path
+- repo root: $FOUNDATIONOS_ROOT
+- snapshot support: $(foundationos::has_cmd omarchy-snapshot && echo omarchy-snapshot || foundationos::has_cmd snapper && echo snapper || echo unavailable)
+- delegated system update: $(foundationos::has_cmd omarchy-update && echo available || echo unavailable)
+EOF
+
+    if [[ ! -f $manifest_path ]]; then
+      foundationos::warn "No update manifest exists for channel $FOUNDATIONOS_CHANNEL."
+    fi
+    ;;
+  apply)
+    foundationos::log "Creating pre-update snapshot"
+    foundationos::snapshot_create || true
+
+    if git -C "$FOUNDATIONOS_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      foundationos::log "Updating FoundationOS fork checkout"
+      git -C "$FOUNDATIONOS_ROOT" pull --ff-only --autostash || foundationos::warn "Git pull did not complete cleanly."
+    else
+      foundationos::warn "FoundationOS root is not a git checkout. Skipping fork update."
+    fi
+
+    if [[ $with_system == true ]]; then
+      if foundationos::has_cmd omarchy-update; then
+        foundationos::log "Running delegated Omarchy system update"
+        omarchy-update -y
+      else
+        foundationos::warn "System update delegation requested, but omarchy-update is not available."
+      fi
+    fi
+
+    cat > "$FOUNDATIONOS_LAST_UPDATE_STATE" <<EOF
+FOUNDATIONOS_LAST_UPDATE_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+FOUNDATIONOS_LAST_UPDATE_CHANNEL=$FOUNDATIONOS_CHANNEL
+FOUNDATIONOS_LAST_UPDATE_RELEASE=$FOUNDATIONOS_RELEASE_ID
+EOF
+
+    foundationos::log "Update state written to $FOUNDATIONOS_LAST_UPDATE_STATE"
+    "$FOUNDATIONOS_ROOT/bin/foundationos-diagnostics" --summary || true
+    ;;
+  *)
+    foundationos::die "Unknown subcommand: $command"
+    ;;
+esac

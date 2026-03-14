@@ -1,13 +1,15 @@
 # Execution
 
-## Immediate Steps
+## Current Execution Path
 
-1. fork `basecamp/omarchy`
-2. copy this skeleton into the fork
-3. preserve the upstream repo structure
-4. implement `FreeIPA` join and desktop-agent packaging first
-5. implement shell integrations second
-6. publish the first image manifest before broad customization
+1. configure `upstream` to `https://github.com/basecamp/omarchy.git`
+2. run `foundationos-upstream-status --fetch`
+3. review `config/foundationos/foundationos.conf`
+4. run `foundationos-enroll --stage-only`
+5. merge the staged `Waybar` and launcher assets into the active Omarchy user config
+6. publish the desktop-agent artifact and the `FreeIPA` enrollment secret flow
+7. validate `foundationos-update plan` and `foundationos-rollback`
+8. cut the first image manifest from `manifests/images/internal-pilot.yaml`
 
 ## Required Outputs
 
@@ -17,3 +19,9 @@
 - role-bundle manifest format
 - update and rollback runbook
 - diagnostics command set
+
+## Backend Dependency
+
+Build the client-side enrollment, status, diagnostics, and task surfaces against:
+
+- `/Users/brian/dev/sndfoundation/docs/handoff/foundationos-backend-surface.md`

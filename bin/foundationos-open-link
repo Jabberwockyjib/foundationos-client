@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -eEo pipefail
+source "$(dirname "$0")/foundationos-env"
+
+link="${1:-}"
+
+[[ -n $link ]] || foundationos::die "usage: foundationos-open-link <foundation://...>"
+
+if foundationos::agent_healthcheck; then
+  curl --silent --show-error --fail \
+    --max-time "$FOUNDATIONOS_CURL_TIMEOUT" \
+    --request POST \
+    --data-urlencode "link=$link" \
+    "${FOUNDATION_AGENT_API_BASE_URL%/}${FOUNDATION_AGENT_OPEN_PATH}" \
+    >/dev/null 2>&1 && exit 0
+fi
+
+target_url="$(foundationos::deep_link_to_url "$link")"
+foundationos::browser_open "$target_url"
+printf '%s\n' "$target_url"

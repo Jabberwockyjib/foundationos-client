@@ -1,0 +1,9 @@
+# FoundationOS integration layer packages.
+# Walker and most Hyprland shell packages are expected to come from the Omarchy base image.
+
+curl
+jq
+libnotify
+snapper
+sssd
+xdg-utils

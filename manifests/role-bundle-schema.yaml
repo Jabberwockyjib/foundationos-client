@@ -1,0 +1,18 @@
+schema_version: v1
+required:
+  - bundle_id
+  - display_name
+  - freeipa_group
+  - foundation_role
+  - erp_bundle
+  - desktop_bundle
+  - foundation_shortcuts
+  - launcher_entries
+  - waybar_modules
+  - workspaces
+  - apps
+rules:
+  - desktop bundles shape the local shell only
+  - FreeIPA group selection drives default bundle resolution
+  - Foundation remains the business authority for governed actions
+  - role bundles must not grant ERP or Foundation permissions by themselves

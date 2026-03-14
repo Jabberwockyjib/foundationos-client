@@ -1,9 +1,21 @@
+schema_version: v1
 bundle_id: finance
 display_name: Finance
+freeipa_group: fnd-finance-admin
+foundation_role: finance_admin
+erp_bundle: erp_finance_admin
+desktop_bundle: desktop_finance
 foundation_shortcuts:
   - pulse
   - approvals
   - chat
+launcher_entries:
+  - foundation-launcher.desktop
+  - foundation-pulse.desktop
+  - foundation-chat.desktop
+  - foundation-approvals.desktop
+waybar_modules:
+  - custom/foundation
 workspaces:
   - finance
   - reporting

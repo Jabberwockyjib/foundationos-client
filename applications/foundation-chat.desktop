@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Foundation Chat
+Comment=Open Foundation Chat
+Exec=foundationos-launch-chat
+Terminal=false
+Type=Application
+Categories=Network;

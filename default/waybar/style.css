@@ -1,0 +1,14 @@
+#custom-foundation.foundation-ok {
+  color: #d4e2d4;
+  background: rgba(42, 74, 52, 0.82);
+}
+
+#custom-foundation.foundation-warn {
+  color: #f5e7b2;
+  background: rgba(98, 73, 18, 0.82);
+}
+
+#custom-foundation.foundation-error {
+  color: #f7d4d4;
+  background: rgba(113, 34, 34, 0.86);
+}

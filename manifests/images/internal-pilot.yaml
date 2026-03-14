@@ -1,0 +1,24 @@
+schema_version: v1
+release_id: foundationos-client-0.1.0
+channel: internal
+site_ref: pilot
+upstream:
+  repo: https://github.com/basecamp/omarchy.git
+  branch: dev
+integration_layer:
+  repo_version_file: version
+  config: config/foundationos/foundationos.conf
+  desktop_agent_manifest: manifests/desktop-agent/package.yaml
+role_bundles:
+  - executive
+  - operations
+  - procurement
+  - finance
+  - admin
+package_manifests:
+  - install/foundationos-base.packages
+update_manifest: manifests/updates/internal.yaml
+blocked_by:
+  - FreeIPA enrollment credentials or OTP issuance flow
+  - signed desktop-agent package artifact
+status: draft

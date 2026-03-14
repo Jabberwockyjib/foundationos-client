@@ -1,9 +1,21 @@
+schema_version: v1
 bundle_id: procurement
 display_name: Procurement
+freeipa_group: fnd-procurement-operator
+foundation_role: procurement_operator
+erp_bundle: erp_procurement_operator
+desktop_bundle: desktop_procurement
 foundation_shortcuts:
   - pulse
   - approvals
   - workflows
+launcher_entries:
+  - foundation-launcher.desktop
+  - foundation-pulse.desktop
+  - foundation-chat.desktop
+  - foundation-approvals.desktop
+waybar_modules:
+  - custom/foundation
 workspaces:
   - procurement
   - erpnext

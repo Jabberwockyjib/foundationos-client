@@ -1,0 +1,53 @@
+#!/bin/bash
+
+set -eEo pipefail
+source "$(dirname "$0")/foundationos-env"
+
+fetch_remote=false
+
+if [[ ${1:-} == "--fetch" ]]; then
+  fetch_remote=true
+fi
+
+if ! git -C "$FOUNDATIONOS_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  foundationos::die "FoundationOS root is not a git checkout: $FOUNDATIONOS_ROOT"
+fi
+
+if ! git -C "$FOUNDATIONOS_ROOT" remote get-url "$FOUNDATIONOS_UPSTREAM_REMOTE" >/dev/null 2>&1; then
+  cat <<EOF
+Upstream remote is not configured.
+
+Recommended setup:
+  git remote add $FOUNDATIONOS_UPSTREAM_REMOTE https://github.com/basecamp/omarchy.git
+  git fetch $FOUNDATIONOS_UPSTREAM_REMOTE $FOUNDATIONOS_UPSTREAM_BRANCH
+
+Fork-owned paths to preserve:
+  - bin/foundationos-*
+  - config/foundationos/
+  - default/role-bundles/
+  - manifests/
+  - docs/
+EOF
+  exit 0
+fi
+
+if [[ $fetch_remote == true ]]; then
+  git -C "$FOUNDATIONOS_ROOT" fetch "$FOUNDATIONOS_UPSTREAM_REMOTE" "$FOUNDATIONOS_UPSTREAM_BRANCH"
+fi
+
+cat <<EOF
+FoundationOS Upstream Status
+- repo root: $FOUNDATIONOS_ROOT
+- fork branch: $FOUNDATIONOS_FORK_BRANCH
+- upstream remote: $FOUNDATIONOS_UPSTREAM_REMOTE
+- upstream branch: $FOUNDATIONOS_UPSTREAM_BRANCH
+- upstream url: $(git -C "$FOUNDATIONOS_ROOT" remote get-url "$FOUNDATIONOS_UPSTREAM_REMOTE")
+EOF
+
+if git -C "$FOUNDATIONOS_ROOT" show-ref --verify --quiet "refs/remotes/$FOUNDATIONOS_UPSTREAM_REMOTE/$FOUNDATIONOS_UPSTREAM_BRANCH"; then
+  git -C "$FOUNDATIONOS_ROOT" rev-list --left-right --count \
+    "$FOUNDATIONOS_FORK_BRANCH...$FOUNDATIONOS_UPSTREAM_REMOTE/$FOUNDATIONOS_UPSTREAM_BRANCH" \
+    | awk '{print "- ahead:", $1, "\n- behind:", $2}'
+else
+  foundationos::warn "Fetch $FOUNDATIONOS_UPSTREAM_REMOTE/$FOUNDATIONOS_UPSTREAM_BRANCH to compute ahead/behind."
+fi

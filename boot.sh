@@ -3,7 +3,7 @@
 set -eEo pipefail
 
 export FOUNDATIONOS_REF="${FOUNDATIONOS_REF:-main}"
-export FOUNDATIONOS_REPO="${FOUNDATIONOS_REPO:-your-org/foundationos-client}"
+export FOUNDATIONOS_REPO="${FOUNDATIONOS_REPO:-sndfoundation/foundationos-client}"
 export FOUNDATIONOS_PATH="${FOUNDATIONOS_PATH:-$HOME/.local/share/foundationos}"
 export PATH="$FOUNDATIONOS_PATH/bin:$PATH"
 

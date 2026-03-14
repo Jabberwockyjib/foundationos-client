@@ -3,4 +3,27 @@
 set -eEo pipefail
 source "$(dirname "$0")/foundationos-env"
 
-xdg-open "$FOUNDATION_BASE_URL"
+surface="${1:-pulse}"
+
+case "$surface" in
+  foundation://*|sndfoundation://*)
+    link="$surface"
+    ;;
+  foundation|pulse)
+    link="foundation://pulse"
+    ;;
+  chat)
+    link="foundation://chat"
+    ;;
+  approvals)
+    link="foundation://approvals"
+    ;;
+  flows)
+    link="foundation://flows"
+    ;;
+  *)
+    link="foundation://$surface"
+    ;;
+esac
+
+exec "$FOUNDATIONOS_ROOT/bin/foundationos-open-link" "$link"

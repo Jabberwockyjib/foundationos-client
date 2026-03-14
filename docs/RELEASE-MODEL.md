@@ -25,3 +25,5 @@ Do not ship a desktop image that has not proven:
 - notification routing
 - role-bundle activation
 - rollback path
+
+Current draft manifests live under `manifests/images/` and `manifests/updates/`.

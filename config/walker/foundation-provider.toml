@@ -1,5 +1,5 @@
 [provider]
-name = "foundation"
+name = "foundationos"
 placeholder = "Search Foundation"
 command = "foundationos-search"
 

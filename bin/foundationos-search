@@ -3,13 +3,95 @@
 set -eEo pipefail
 source "$(dirname "$0")/foundationos-env"
 
-query="${1:-}"
+mode="table"
+open_first=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --json)
+      mode="json"
+      shift
+      ;;
+    --open-first)
+      open_first=true
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+query="$*"
+raw=""
+results=""
+fallback_url=""
 
 if [[ -z $query ]]; then
   echo "usage: foundationos-search <query>"
   exit 1
 fi
 
-echo "TODO: route launcher search through the Foundation desktop agent or Foundation search API."
-echo "Query: $query"
-echo "API: $FOUNDATION_API_BASE_URL"
+if foundationos::agent_healthcheck; then
+  raw="$(
+    curl --silent --show-error --fail \
+      --max-time "$FOUNDATIONOS_CURL_TIMEOUT" \
+      --get \
+      --data-urlencode "q=$query" \
+      "${FOUNDATION_AGENT_API_BASE_URL%/}${FOUNDATION_AGENT_SEARCH_PATH}" \
+      2>/dev/null || true
+  )"
+fi
+
+if [[ -z $raw ]]; then
+  raw="$(
+    curl --silent --show-error --fail \
+      --max-time "$FOUNDATIONOS_CURL_TIMEOUT" \
+      --get \
+      --data-urlencode "q=$query" \
+      "${FOUNDATION_API_BASE_URL%/}${FOUNDATION_SEARCH_PATH}" \
+      2>/dev/null || true
+  )"
+fi
+
+fallback_url="$(foundationos::search_fallback_url "$query")"
+
+if [[ $mode == "json" ]]; then
+  if [[ -n $raw ]]; then
+    printf '%s\n' "$raw"
+  else
+    printf '{"results":[{"title":"Search Foundation","url":"%s"}]}\n' "$fallback_url"
+  fi
+  exit 0
+fi
+
+if [[ -n $raw ]] && foundationos::has_cmd jq; then
+  results="$(
+    printf '%s' "$raw" | jq -r '
+      (.results // .items // .data // .) as $root
+      | if ($root | type) == "array" then $root else [] end
+      | .[]
+      | select(type == "object")
+      | [(.title // .label // .name // .id // "Result"), (.deep_link // .url // "")]
+      | @tsv
+    ' 2>/dev/null || true
+  )"
+fi
+
+if [[ -z $results ]]; then
+  results=$'Search Foundation\t'"$fallback_url"
+fi
+
+if [[ $open_first == true ]]; then
+  target="$(printf '%s\n' "$results" | awk -F'\t' 'NR == 1 { print $2 }')"
+  if [[ -n $target ]]; then
+    if [[ $target == foundation://* || $target == sndfoundation://* ]]; then
+      "$FOUNDATIONOS_ROOT/bin/foundationos-open-link" "$target"
+    else
+      foundationos::browser_open "$target"
+    fi
+  fi
+  exit 0
+fi
+
+printf '%s\n' "$results"

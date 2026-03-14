@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Foundation Approvals
+Comment=Open the Foundation approval queue
+Exec=foundationos-approvals
+Terminal=false
+Type=Application
+Categories=Office;

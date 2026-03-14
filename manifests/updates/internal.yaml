@@ -1,0 +1,14 @@
+schema_version: v1
+channel: internal
+update_strategy: git-pull-plus-optional-omarchy-update
+snapshot_required: true
+rollback_command: foundationos-rollback
+preflight:
+  - foundationos-update plan
+  - foundationos-diagnostics --summary
+postflight:
+  - foundationos-diagnostics --summary
+  - foundationos-launcher
+blocked_by:
+  - signed package repository or image feed for production channels
+  - rollout cohort policy and approver record

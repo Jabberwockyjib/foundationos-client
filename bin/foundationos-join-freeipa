@@ -1,0 +1,114 @@
+#!/bin/bash
+
+set -eEo pipefail
+source "$(dirname "$0")/foundationos-env"
+
+dry_run=false
+stage_only=false
+force_join=false
+hostname_override=""
+principal=""
+password=""
+password_stdin=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run)
+      dry_run=true
+      shift
+      ;;
+    --stage-only)
+      stage_only=true
+      shift
+      ;;
+    --force)
+      force_join=true
+      shift
+      ;;
+    --hostname)
+      hostname_override="$2"
+      shift 2
+      ;;
+    --otp)
+      password="$2"
+      shift 2
+      ;;
+    --principal)
+      principal="$2"
+      shift 2
+      ;;
+    --password)
+      password="$2"
+      shift 2
+      ;;
+    --password-stdin)
+      password_stdin=true
+      shift
+      ;;
+    *)
+      foundationos::die "Unknown argument: $1"
+      ;;
+  esac
+done
+
+if [[ $password_stdin == true ]]; then
+  IFS= read -r password
+fi
+
+if foundationos::freeipa_joined && [[ $force_join == false ]]; then
+  foundationos::info "This workstation already appears to be joined to $FREEIPA_REALM."
+  exit 0
+fi
+
+hostname_value="${hostname_override:-$(hostname -f 2>/dev/null || hostname)}"
+join_command=(
+  "$FREEIPA_JOIN_COMMAND"
+  "--unattended"
+  "--server=$FREEIPA_SERVER"
+  "--domain=$FREEIPA_DOMAIN"
+  "--realm=$FREEIPA_REALM"
+  "--hostname=$hostname_value"
+  "--mkhomedir"
+)
+
+[[ $force_join == true ]] && join_command+=("--force-join")
+[[ -n $principal ]] && join_command+=("--principal=$principal")
+[[ -n $password ]] && join_command+=("--password=$password")
+
+if [[ $stage_only == true || $dry_run == true ]]; then
+  foundationos::log "Prepared FreeIPA join command:"
+  sanitized_command=("${join_command[@]}")
+  for i in "${!sanitized_command[@]}"; do
+    if [[ ${sanitized_command[$i]} == --password=* ]]; then
+      sanitized_command[$i]='--password=***'
+    fi
+  done
+  printf '  %q' "${sanitized_command[@]}"
+  printf '\n'
+  exit 0
+fi
+
+if ! foundationos::has_cmd "$FREEIPA_JOIN_COMMAND"; then
+  foundationos::warn "Join command '$FREEIPA_JOIN_COMMAND' is not available. Install the client package or override FREEIPA_JOIN_COMMAND."
+  exit 2
+fi
+
+if (( EUID != 0 )); then
+  if foundationos::has_cmd sudo; then
+    sudo "${join_command[@]}"
+  else
+    foundationos::die "FreeIPA join requires root privileges and sudo is unavailable."
+  fi
+else
+  "${join_command[@]}"
+fi
+
+cat > "$FOUNDATIONOS_ENROLLMENT_STATE" <<EOF
+FOUNDATIONOS_FREEIPA_JOINED=true
+FOUNDATIONOS_FREEIPA_REALM=$FREEIPA_REALM
+FOUNDATIONOS_FREEIPA_SERVER=$FREEIPA_SERVER
+FOUNDATIONOS_FREEIPA_HOSTNAME=$hostname_value
+FOUNDATIONOS_FREEIPA_JOINED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+EOF
+
+foundationos::log "FreeIPA join completed for $hostname_value"

@@ -3,4 +3,114 @@
 set -eEo pipefail
 source "$(dirname "$0")/foundationos-env"
 
-echo "TODO: enroll this workstation into FreeIPA, register the desktop agent, and apply the assigned role bundle."
+dry_run=false
+stage_only=false
+skip_join=false
+skip_agent=false
+role_bundle=""
+hostname_override=""
+otp=""
+principal=""
+password=""
+password_stdin=false
+blockers=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run)
+      dry_run=true
+      shift
+      ;;
+    --stage-only)
+      stage_only=true
+      shift
+      ;;
+    --skip-join)
+      skip_join=true
+      shift
+      ;;
+    --skip-agent)
+      skip_agent=true
+      shift
+      ;;
+    --role-bundle)
+      role_bundle="$2"
+      shift 2
+      ;;
+    --hostname)
+      hostname_override="$2"
+      shift 2
+      ;;
+    --otp)
+      otp="$2"
+      shift 2
+      ;;
+    --principal)
+      principal="$2"
+      shift 2
+      ;;
+    --password)
+      password="$2"
+      shift 2
+      ;;
+    --password-stdin)
+      password_stdin=true
+      shift
+      ;;
+    *)
+      foundationos::die "Unknown argument: $1"
+      ;;
+  esac
+done
+
+if [[ $password_stdin == true ]]; then
+  IFS= read -r password
+fi
+
+foundationos::log "Starting FoundationOS enrollment"
+
+if [[ $skip_join == false ]]; then
+  join_args=()
+  [[ $dry_run == true ]] && join_args+=(--dry-run)
+  [[ $stage_only == true ]] && join_args+=(--stage-only)
+  [[ -n $hostname_override ]] && join_args+=(--hostname "$hostname_override")
+  [[ -n $otp ]] && join_args+=(--otp "$otp")
+  [[ -n $principal ]] && join_args+=(--principal "$principal")
+  [[ -n $password ]] && join_args+=(--password "$password")
+
+  if ! "$FOUNDATIONOS_ROOT/bin/foundationos-join-freeipa" "${join_args[@]}"; then
+    foundationos::warn "FreeIPA join did not complete. Continuing with local staging."
+    blockers=$((blockers + 1))
+  fi
+fi
+
+if [[ $skip_agent == false ]]; then
+  agent_args=()
+  [[ $stage_only == true ]] && agent_args+=(--stage-only)
+  if ! "$FOUNDATIONOS_ROOT/bin/foundationos-install-agent" "${agent_args[@]}"; then
+    foundationos::warn "Desktop agent install did not complete. Continuing with local staging."
+    blockers=$((blockers + 1))
+  fi
+fi
+
+apply_args=()
+if [[ -n $role_bundle ]]; then
+  apply_args+=("$role_bundle")
+fi
+"$FOUNDATIONOS_ROOT/bin/foundationos-apply-role-bundle" "${apply_args[@]}"
+
+cat > "$FOUNDATIONOS_ENROLLMENT_STATE" <<EOF
+FOUNDATIONOS_LAST_ENROLLMENT_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+FOUNDATIONOS_LAST_ENROLLMENT_HOSTNAME=${hostname_override:-$(hostname -f 2>/dev/null || hostname)}
+FOUNDATIONOS_LAST_ENROLLMENT_CHANNEL=$FOUNDATIONOS_CHANNEL
+FOUNDATIONOS_LAST_ENROLLMENT_RELEASE=$FOUNDATIONOS_RELEASE_ID
+FOUNDATIONOS_LAST_ENROLLMENT_ROLE_BUNDLE=$(foundationos::role_bundle_from_groups)
+EOF
+
+foundationos::log "Enrollment state written to $FOUNDATIONOS_ENROLLMENT_STATE"
+"$FOUNDATIONOS_ROOT/bin/foundationos-diagnostics" --summary || true
+
+if (( blockers > 0 )); then
+  foundationos::warn "Enrollment completed with $blockers blocker(s). Review the warnings above before piloting this workstation."
+  exit 2
+fi

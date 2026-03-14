@@ -1,0 +1,10 @@
+schema_version: v1
+package_id: foundation-desktop-agent
+mode: skip
+binary: foundation-desktop-agent
+service: foundation-desktop-agent.service
+api_base_url: http://127.0.0.1:47832
+artifact_source: pending
+blocked_by:
+  - signed desktop-agent package or repository feed
+  - published agent open/search/health endpoint contract

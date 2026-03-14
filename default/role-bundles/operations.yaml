@@ -1,10 +1,22 @@
+schema_version: v1
 bundle_id: operations
 display_name: Operations
+freeipa_group: fnd-ops-manager
+foundation_role: ops_manager
+erp_bundle: erp_ops_manager
+desktop_bundle: desktop_ops_manager
 foundation_shortcuts:
   - pulse
   - chat
   - flows
   - approvals
+launcher_entries:
+  - foundation-launcher.desktop
+  - foundation-pulse.desktop
+  - foundation-chat.desktop
+  - foundation-approvals.desktop
+waybar_modules:
+  - custom/foundation
 workspaces:
   - pulse
   - erpnext

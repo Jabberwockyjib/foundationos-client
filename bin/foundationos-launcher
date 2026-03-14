@@ -1,0 +1,63 @@
+#!/bin/bash
+
+set -eEo pipefail
+source "$(dirname "$0")/foundationos-env"
+
+prompt_menu() {
+  local prompt="$1"
+
+  if foundationos::has_cmd walker; then
+    walker --dmenu -p "$prompt"
+    return 0
+  fi
+
+  if foundationos::has_cmd rofi; then
+    rofi -dmenu -p "$prompt"
+    return 0
+  fi
+
+  if foundationos::has_cmd wofi; then
+    wofi --dmenu --prompt "$prompt"
+    return 0
+  fi
+
+  foundationos::die "No supported launcher is available. Install Walker, Rofi, or Wofi."
+}
+
+selection="$(
+  printf '%s\n' \
+    "Open Pulse" \
+    "Open Chat" \
+    "Open Approvals" \
+    "Open Flows" \
+    "Search Foundation" \
+    "Diagnostics" \
+    | prompt_menu "Foundation"
+)"
+
+case "$selection" in
+  "Open Pulse")
+    "$FOUNDATIONOS_ROOT/bin/foundationos-open-link" foundation://pulse
+    ;;
+  "Open Chat")
+    "$FOUNDATIONOS_ROOT/bin/foundationos-open-link" foundation://chat
+    ;;
+  "Open Approvals")
+    "$FOUNDATIONOS_ROOT/bin/foundationos-open-link" foundation://approvals
+    ;;
+  "Open Flows")
+    "$FOUNDATIONOS_ROOT/bin/foundationos-open-link" foundation://flows
+    ;;
+  "Search Foundation")
+    query="$(printf '' | prompt_menu "Foundation search")"
+    [[ -n $query ]] && "$FOUNDATIONOS_ROOT/bin/foundationos-search" --open-first "$query"
+    ;;
+  "Diagnostics")
+    foundationos::launch_terminal "foundationos-diagnostics; printf '\nPress Enter to close...'; read -r _"
+    ;;
+  "")
+    ;;
+  *)
+    foundationos::warn "Unhandled launcher selection: $selection"
+    ;;
+esac

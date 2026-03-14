@@ -1,10 +1,22 @@
+schema_version: v1
 bundle_id: admin
 display_name: Admin
+freeipa_group: fnd-system-admin
+foundation_role: system_admin
+erp_bundle: erp_system_admin
+desktop_bundle: desktop_admin
 foundation_shortcuts:
   - pulse
   - chat
   - approvals
   - diagnostics
+launcher_entries:
+  - foundation-launcher.desktop
+  - foundation-pulse.desktop
+  - foundation-chat.desktop
+  - foundation-approvals.desktop
+waybar_modules:
+  - custom/foundation
 workspaces:
   - admin
   - monitoring

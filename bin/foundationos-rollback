@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -eEo pipefail
+source "$(dirname "$0")/foundationos-env"
+
+foundationos::log "Starting FoundationOS rollback"
+foundationos::snapshot_restore

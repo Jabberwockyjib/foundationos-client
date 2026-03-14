@@ -33,18 +33,28 @@ It is a starting structure, not a complete desktop product.
 - `config/` fork-owned config overlays
 - `default/role-bundles/` role manifests
 - `install/` preflight, config, login, and post-install modules
+- `manifests/` image, update, and packaging manifests
 - `docs/` execution docs for the client team
 - `migrations/` upgrade-safe workstation changes
 - `themes/` branded theme data
 
+## Implemented Scaffolding
+
+- shared runtime library in `lib/foundationos.sh`
+- executable enrollment, agent, update, rollback, and diagnostics commands in `bin/`
+- package manifests and install phases aligned with Omarchy's `install/packaging/` shape
+- role-bundle mapping and richer bundle manifests tied to `FreeIPA` groups
+- staged `Waybar`, launcher, protocol-handler, and desktop-agent service assets
+- draft image, update, and desktop-agent manifests with explicit blockers
+
 ## First Tasks For The Client Team
 
-1. create the real fork repo and copy this skeleton into it
-2. wire the upstream sync policy in `docs/UPSTREAM-SYNC.md`
-3. implement the `FreeIPA` join path
-4. package the Foundation desktop agent
-5. implement the first `Waybar` and launcher integrations
-6. publish the first image manifest and release record
+1. configure the upstream Omarchy remote and run `foundationos-upstream-status`
+2. publish the desktop-agent package artifact and set `FOUNDATION_AGENT_PACKAGE_MODE`
+3. publish the `FreeIPA` client package source and enrollment credential flow
+4. merge the staged `Waybar` and launcher assets into the active Omarchy configs
+5. validate `foundationos-enroll` on a real pilot workstation
+6. publish the first signed image and update manifests
 
 ## Required External Inputs
 
@@ -53,6 +63,14 @@ It is a starting structure, not a complete desktop product.
 - desktop-agent packaging artifact
 - role-bundle policy
 - release signing and update-channel policy
+
+## Backend Contract Of Record
+
+The current server-side surface for this client track is documented in:
+
+- `/Users/brian/dev/sndfoundation/docs/handoff/foundationos-backend-surface.md`
+
+Use that document as the backend contract until the client fork is split into its own repository.
 
 ## Non-Goals
 

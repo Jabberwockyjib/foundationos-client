@@ -1,13 +1,12 @@
 {
-  "layer": "top",
-  "position": "top",
-  "modules-right": ["custom/foundation"],
   "custom/foundation": {
-    "format": "FOUNDATION",
+    "format": "{}",
     "tooltip": true,
-    "on-click": "foundationos-launch-foundation",
-    "on-click-right": "foundationos-status",
+    "on-click": "foundationos-launcher",
+    "on-click-middle": "foundationos-launch-foundation pulse",
+    "on-click-right": "foundationos-launcher",
     "return-type": "json",
-    "exec": "printf '{\"text\":\"FOUNDATION\",\"tooltip\":\"Open Foundation and inspect desktop status\"}'"
+    "exec": "foundationos-waybar",
+    "interval": 30
   }
 }

@@ -1,0 +1,72 @@
+#!/bin/bash
+
+set -eEo pipefail
+source "$(dirname "$0")/foundationos-env"
+
+summary_only=false
+
+if [[ ${1:-} == "--summary" ]]; then
+  summary_only=true
+fi
+
+bundle="$(foundationos::role_bundle_from_groups)"
+bundle_path="$(foundationos::role_bundle_path "$bundle")"
+bundle_label="unknown"
+foundation_state="offline"
+agent_service_state="inactive"
+agent_api_state="offline"
+agent_binary_state="missing"
+freeipa_state="not-joined"
+upstream_state="not-configured"
+
+if [[ -f $bundle_path ]]; then
+  bundle_label="$(foundationos::read_bundle_scalar display_name "$bundle_path")"
+else
+  foundationos::warn "Resolved role bundle is missing: $bundle_path"
+fi
+
+foundationos::foundation_healthcheck && foundation_state="online"
+foundationos::agent_binary_present && agent_binary_state="present"
+foundationos::agent_service_active && agent_service_state="active"
+foundationos::agent_healthcheck && agent_api_state="online"
+foundationos::freeipa_joined && freeipa_state="joined"
+
+if git -C "$FOUNDATIONOS_ROOT" remote get-url "$FOUNDATIONOS_UPSTREAM_REMOTE" >/dev/null 2>&1; then
+  upstream_state="configured"
+fi
+
+if [[ $summary_only == true ]]; then
+  cat <<EOF
+FoundationOS Client Status
+- release id: $FOUNDATIONOS_RELEASE_ID
+- channel: $FOUNDATIONOS_CHANNEL
+- role bundle: $bundle (${bundle_label:-unknown})
+- foundation api: $foundation_state
+- desktop agent binary: $agent_binary_state
+- desktop agent service: $agent_service_state
+- desktop agent api: $agent_api_state
+- freeipa: $freeipa_state
+- upstream remote: $upstream_state
+EOF
+  exit 0
+fi
+
+cat <<EOF
+FoundationOS Diagnostics
+- repo root: $FOUNDATIONOS_ROOT
+- config path: $FOUNDATIONOS_CONFIG
+- state dir: $FOUNDATIONOS_STATE_DIR
+- release id: $FOUNDATIONOS_RELEASE_ID
+- channel: $FOUNDATIONOS_CHANNEL
+- upstream remote: $FOUNDATIONOS_UPSTREAM_REMOTE ($upstream_state)
+- foundation base url: $FOUNDATION_BASE_URL
+- foundation api url: $FOUNDATION_API_BASE_URL ($foundation_state)
+- desktop agent service: $FOUNDATION_AGENT_SERVICE ($agent_service_state)
+- desktop agent binary: $FOUNDATION_AGENT_BINARY ($agent_binary_state)
+- desktop agent api: $FOUNDATION_AGENT_API_BASE_URL ($agent_api_state)
+- freeipa server: $FREEIPA_SERVER
+- freeipa realm: $FREEIPA_REALM
+- freeipa state: $freeipa_state
+- role bundle: $bundle (${bundle_label:-unknown})
+- role bundle manifest: $bundle_path
+EOF

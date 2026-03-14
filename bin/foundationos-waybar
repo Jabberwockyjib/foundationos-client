@@ -1,0 +1,48 @@
+#!/bin/bash
+
+set -eEo pipefail
+source "$(dirname "$0")/foundationos-env"
+
+bundle="$(foundationos::role_bundle_from_groups)"
+bundle_path="$(foundationos::role_bundle_path "$bundle")"
+bundle_label="$bundle"
+text="FND"
+state_class="foundation-warn"
+tooltip_lines=()
+
+[[ -f $bundle_path ]] && bundle_label="$(foundationos::read_bundle_scalar display_name "$bundle_path")"
+
+tooltip_lines+=("User: $(foundationos::current_user)")
+tooltip_lines+=("Role: $bundle_label")
+tooltip_lines+=("Channel: $FOUNDATIONOS_CHANNEL")
+tooltip_lines+=("Release: $FOUNDATIONOS_RELEASE_ID")
+
+if foundationos::foundation_healthcheck; then
+  tooltip_lines+=("Foundation API: online")
+  state_class="foundation-ok"
+else
+  tooltip_lines+=("Foundation API: offline")
+  text="FND?"
+  state_class="foundation-warn"
+fi
+
+if foundationos::agent_service_active; then
+  tooltip_lines+=("Desktop agent: active")
+else
+  tooltip_lines+=("Desktop agent: inactive")
+  text="FND!"
+  state_class="foundation-error"
+fi
+
+if foundationos::freeipa_joined; then
+  tooltip_lines+=("FreeIPA: joined")
+else
+  tooltip_lines+=("FreeIPA: pending")
+fi
+
+tooltip="$(printf '%s\n' "${tooltip_lines[@]}")"
+
+printf '{"text":"%s","tooltip":"%s","class":"%s"}\n' \
+  "$(foundationos::json_escape "$text")" \
+  "$(foundationos::json_escape "$tooltip")" \
+  "$(foundationos::json_escape "$state_class")"
