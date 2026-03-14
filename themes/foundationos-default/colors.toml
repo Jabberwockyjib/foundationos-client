@@ -1,3 +1,26 @@
-accent = "#d45b5b"
-background = "#101216"
+accent = "#8aa76b"
+cursor = "#f4efe5"
+
 foreground = "#f4efe5"
+background = "#101216"
+
+selection_foreground = "#101216"
+selection_background = "#d8dfc9"
+
+color0 = "#101216"
+color1 = "#b46a5e"
+color2 = "#7ea56d"
+color3 = "#c8a56a"
+color4 = "#6f8ca0"
+color5 = "#9a7fb5"
+color6 = "#5e9a96"
+color7 = "#d5d0c4"
+
+color8 = "#6e7378"
+color9 = "#d58a79"
+color10 = "#9fc48b"
+color11 = "#d9bb79"
+color12 = "#8cadc4"
+color13 = "#b49ad0"
+color14 = "#7dbab4"
+color15 = "#f4efe5"
