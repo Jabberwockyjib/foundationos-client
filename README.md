@@ -33,6 +33,7 @@ It is a starting structure, not a complete desktop product.
 - `config/` fork-owned config overlays
 - `default/role-bundles/` role manifests
 - `install/` preflight, config, login, and post-install modules
+- `iso/` bootstrap ISO build scaffold based on `archiso`
 - `manifests/` image, update, and packaging manifests
 - `docs/` execution docs for the client team
 - `migrations/` upgrade-safe workstation changes
@@ -65,6 +66,16 @@ The repo can now stage a runnable test tree for an Arch VM by cloning upstream O
 - run the generated tree's `install.sh` inside the VM
 - expect shell, agent, and enrollment scaffolding to come up
 - expect real identity enrollment and agent registration to remain blocked until the external artifacts exist
+
+## Hardware Path
+
+For a real workstation install, use the official `Omarchy` ISO first, then overlay `FoundationOS` by following:
+
+- `docs/HARDWARE-INSTALL.md`
+
+If you want a live bootstrap image for diagnostics and future installer work, see:
+
+- `iso/README.md`
 
 ## Required External Inputs
 

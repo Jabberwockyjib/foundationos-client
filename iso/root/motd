@@ -1,0 +1,10 @@
+FoundationOS bootstrap live image
+
+Embedded repo:
+  /opt/foundationos-client
+
+Quick commands:
+  foundationos-live-stage
+  less /opt/foundationos-client/docs/HARDWARE-INSTALL.md
+
+This image is a bootstrap and validation environment, not yet the final hardware installer.
