@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -eEo pipefail
+source "$(dirname "$0")/foundationos-env"
+
+if foundationos::has_cmd omarchy-restart-walker; then
+  exec omarchy-restart-walker
+fi
+
+if foundationos::has_cmd pkill; then
+  pkill -x walker >/dev/null 2>&1 || true
+  exit 0
+fi
+
+foundationos::die "No supported launcher restart command is available."

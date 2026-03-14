@@ -44,7 +44,7 @@
     "format": "2F",
     "on-click": "foundationos-menu",
     "on-click-right": "xdg-terminal-exec",
-    "tooltip-format": "FoundationOS Menu\n\nSuper + Alt + Space"
+    "tooltip-format": "FoundationOS Operator Menu\n\nSuper + Alt + Space"
   },
   "custom/update": {
     "format": "",

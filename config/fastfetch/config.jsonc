@@ -114,7 +114,7 @@
       "type": "command",
       "key": "│ ├󰸌",
       "keyColor": "blue",
-      "text": "theme=$(omarchy-theme-current 2>/dev/null || echo default); echo -e \"$theme \\e[38m●\\e[37m●\\e[36m●\\e[35m●\\e[34m●\\e[33m●\\e[32m●\\e[31m●\""
+      "text": "theme=$(foundationos-theme-current 2>/dev/null || echo foundationos-default); echo -e \"$theme \\e[38;5;151m●\\e[38;5;188m●\\e[38;5;180m●\\e[38;5;144m●\\e[38;5;114m●\\e[38;5;108m●\\e[38;5;72m●\\e[38;5;66m●\""
     },
     {
       "type": "terminalfont",

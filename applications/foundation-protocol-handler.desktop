@@ -2,6 +2,7 @@
 Name=Foundation Protocol Handler
 Comment=Handle Foundation deep links
 Exec=foundationos-open-link %u
+Icon=foundation-protocol-handler
 Terminal=false
 Type=Application
 NoDisplay=true

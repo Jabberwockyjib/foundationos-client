@@ -2,6 +2,7 @@
 Name=Foundation Diagnostics
 Comment=Inspect FoundationOS client integration status
 Exec=foundationos-diagnostics
+Icon=foundation-diagnostics
 Terminal=true
 Type=Application
 Categories=System;

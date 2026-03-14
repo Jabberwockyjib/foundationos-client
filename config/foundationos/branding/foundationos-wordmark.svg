@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 160" role="img" aria-label="FoundationOS wordmark">
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#11171d"/>
+      <stop offset="100%" stop-color="#1e2a22"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d7e4c3"/>
+      <stop offset="100%" stop-color="#86b071"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="144" height="144" rx="34" fill="url(#panel)"/>
+  <path d="M42 34h62v16H58v18h38v16H58v40H42V34Z" fill="#f3eee1"/>
+  <path d="M110 34c-15 0-27 5-35 16l12 10c6-7 14-10 23-10 9 0 15 4 15 12 0 6-4 10-12 14L95 86c-13 7-21 18-23 34h62v-16H98c3-3 7-5 11-8l17-9c13-7 19-16 19-30 0-15-11-23-35-23Z" fill="url(#accent)"/>
+  <text x="182" y="76" fill="#f3eee1" font-size="46" font-family="JetBrains Mono, Inter, sans-serif" font-weight="700" letter-spacing="1.5">FoundationOS</text>
+  <text x="182" y="112" fill="#9ab18c" font-size="18" font-family="JetBrains Mono, Inter, sans-serif" letter-spacing="3">OPERATOR DESKTOP FOR 2ndFOUNDATION</text>
+</svg>

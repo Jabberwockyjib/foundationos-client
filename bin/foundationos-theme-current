@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -eEo pipefail
+source "$(dirname "$0")/foundationos-env"
+
+theme="foundationos-default"
+
+if foundationos::has_cmd omarchy-theme-current; then
+  theme="$(omarchy-theme-current 2>/dev/null || echo foundationos-default)"
+fi
+
+theme="${theme//vantablack-omarchy/foundationos-obsidian}"
+theme="${theme//omarchy-default/foundationos-default}"
+theme="${theme//omarchy/foundationos}"
+
+printf '%s\n' "$theme"

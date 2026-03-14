@@ -7,6 +7,7 @@ foundationos_step "Staging shell integration assets"
 mkdir -p \
   "$HOME/.config/environment.d" \
   "$HOME/.config/fastfetch" \
+  "$HOME/.config/foundationos/walker/themes/foundationos-default" \
   "$HOME/.config/foundationos/waybar" \
   "$HOME/.config/foundationos/branding" \
   "$HOME/.config/foundationos/walker" \
@@ -15,7 +16,8 @@ mkdir -p \
   "$HOME/.config/uwsm" \
   "$HOME/.config/walker" \
   "$HOME/.config/waybar" \
-  "$HOME/.local/share/applications"
+  "$HOME/.local/share/applications" \
+  "$HOME/.local/share/icons/hicolor/scalable/apps"
 
 install -m 0644 \
   "$FOUNDATIONOS_PATH/config/environment.d/90-foundationos.conf" \
@@ -48,17 +50,50 @@ install -m 0644 \
   "$FOUNDATIONOS_PATH/config/walker/foundation-provider.toml" \
   "$HOME/.config/foundationos/walker/foundation-provider.toml"
 install -m 0644 \
+  "$FOUNDATIONOS_PATH/default/walker/themes/foundationos-default/style.css" \
+  "$HOME/.config/foundationos/walker/themes/foundationos-default/style.css"
+install -m 0644 \
+  "$FOUNDATIONOS_PATH/default/walker/themes/foundationos-default/layout.xml" \
+  "$HOME/.config/foundationos/walker/themes/foundationos-default/layout.xml"
+install -m 0644 \
   "$FOUNDATIONOS_PATH/config/foundationos/branding/about.txt" \
   "$HOME/.config/foundationos/branding/about.txt"
 install -m 0644 \
   "$FOUNDATIONOS_PATH/config/foundationos/branding/screensaver.txt" \
   "$HOME/.config/foundationos/branding/screensaver.txt"
 install -m 0644 \
+  "$FOUNDATIONOS_PATH/config/foundationos/branding/foundationos-mark.svg" \
+  "$HOME/.config/foundationos/branding/foundationos-mark.svg"
+install -m 0644 \
+  "$FOUNDATIONOS_PATH/config/foundationos/branding/foundationos-wordmark.svg" \
+  "$HOME/.config/foundationos/branding/foundationos-wordmark.svg"
+install -m 0644 \
   "$FOUNDATIONOS_PATH/config/omarchy/branding/about.txt" \
   "$HOME/.config/omarchy/branding/about.txt"
 install -m 0644 \
   "$FOUNDATIONOS_PATH/config/omarchy/branding/screensaver.txt" \
   "$HOME/.config/omarchy/branding/screensaver.txt"
+install -m 0644 \
+  "$FOUNDATIONOS_PATH/config/foundationos/branding/foundationos-mark.svg" \
+  "$HOME/.local/share/icons/hicolor/scalable/apps/foundationos.svg"
+install -m 0644 \
+  "$FOUNDATIONOS_PATH/config/foundationos/branding/foundationos-mark.svg" \
+  "$HOME/.local/share/icons/hicolor/scalable/apps/foundation-launcher.svg"
+install -m 0644 \
+  "$FOUNDATIONOS_PATH/config/foundationos/branding/foundationos-mark.svg" \
+  "$HOME/.local/share/icons/hicolor/scalable/apps/foundation-chat.svg"
+install -m 0644 \
+  "$FOUNDATIONOS_PATH/config/foundationos/branding/foundationos-mark.svg" \
+  "$HOME/.local/share/icons/hicolor/scalable/apps/foundation-pulse.svg"
+install -m 0644 \
+  "$FOUNDATIONOS_PATH/config/foundationos/branding/foundationos-mark.svg" \
+  "$HOME/.local/share/icons/hicolor/scalable/apps/foundation-approvals.svg"
+install -m 0644 \
+  "$FOUNDATIONOS_PATH/config/foundationos/branding/foundationos-mark.svg" \
+  "$HOME/.local/share/icons/hicolor/scalable/apps/foundation-diagnostics.svg"
+install -m 0644 \
+  "$FOUNDATIONOS_PATH/config/foundationos/branding/foundationos-mark.svg" \
+  "$HOME/.local/share/icons/hicolor/scalable/apps/foundation-protocol-handler.svg"
 
 cat > "$HOME/.config/foundationos/session.env" <<EOF
 FOUNDATIONOS_PATH=$FOUNDATIONOS_PATH
@@ -71,6 +106,10 @@ done
 
 if command -v update-desktop-database >/dev/null 2>&1; then
   update-desktop-database "$HOME/.local/share/applications" >/dev/null 2>&1 || true
+fi
+
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+  gtk-update-icon-cache -f -q "$HOME/.local/share/icons/hicolor" >/dev/null 2>&1 || true
 fi
 
 if [[ -f $HOME/.config/waybar/config.jsonc ]] && ! grep -q 'custom/foundation' "$HOME/.config/waybar/config.jsonc"; then
