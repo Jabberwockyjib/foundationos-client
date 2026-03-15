@@ -2,42 +2,10 @@
 
 set -eEo pipefail
 source "$(dirname "$0")/foundationos-env"
-
-prompt_menu() {
-  local prompt="$1"
-
-  if foundationos::has_cmd walker; then
-    walker --dmenu -p "$prompt"
-    return 0
-  fi
-
-  if foundationos::has_cmd rofi; then
-    rofi -dmenu -p "$prompt"
-    return 0
-  fi
-
-  if foundationos::has_cmd wofi; then
-    wofi --dmenu --prompt "$prompt"
-    return 0
-  fi
-
-  foundationos::die "No supported launcher is available. Install Walker, Rofi, or Wofi."
-}
+source "$FOUNDATIONOS_ROOT/lib/foundationos-ui.sh"
 
 selection="$(
-  printf '%s\n' \
-    "Foundation Launcher" \
-    "Foundation Pulse" \
-    "Foundation Chat" \
-    "Foundation Approvals" \
-    "Foundation Flows" \
-    "Application Launcher" \
-    "Setup" \
-    "Style" \
-    "System" \
-    "Update Plan" \
-    "Diagnostics" \
-    | prompt_menu "FoundationOS"
+  foundationos::ui::menu "FoundationOS" $'Foundation Launcher\nFoundation Pulse\nFoundation Chat\nFoundation Approvals\nFoundation Flows\nApplication Launcher\nWorkstation Setup\nDesktop Style\nClient Update\nAbout Workstation\nPower\nDiagnostics'
 )"
 
 case "$selection" in
@@ -63,17 +31,20 @@ case "$selection" in
       "$FOUNDATIONOS_ROOT/bin/foundationos-launcher"
     fi
     ;;
-  "Setup")
-    foundationos::has_cmd omarchy-menu && omarchy-menu setup
+  "Workstation Setup")
+    "$FOUNDATIONOS_ROOT/bin/foundationos-workstation-menu" setup
     ;;
-  "Style")
-    foundationos::has_cmd omarchy-menu && omarchy-menu style
+  "Desktop Style")
+    "$FOUNDATIONOS_ROOT/bin/foundationos-workstation-menu" style
     ;;
-  "System")
-    foundationos::has_cmd omarchy-menu && omarchy-menu system
+  "Client Update")
+    "$FOUNDATIONOS_ROOT/bin/foundationos-workstation-menu" update
     ;;
-  "Update Plan")
-    foundationos::launch_terminal "foundationos-update plan; printf '\nPress Enter to close...'; read -r _"
+  "About Workstation")
+    "$FOUNDATIONOS_ROOT/bin/foundationos-workstation-menu" about
+    ;;
+  "Power")
+    "$FOUNDATIONOS_ROOT/bin/foundationos-workstation-menu" system
     ;;
   "Diagnostics")
     foundationos::launch_terminal "foundationos-diagnostics; printf '\nPress Enter to close...'; read -r _"

@@ -49,8 +49,8 @@
   "custom/update": {
     "format": "",
     "exec": "omarchy-update-available",
-    "on-click": "xdg-terminal-exec bash -lc 'foundationos-update plan; printf \"\\nPress Enter to close...\"; read -r _'",
-    "tooltip-format": "FoundationOS update available",
+    "on-click": "foundationos-workstation-menu update",
+    "tooltip-format": "FoundationOS updates and maintenance",
     "signal": 7,
     "interval": 21600
   },
@@ -99,7 +99,7 @@
     "tooltip-format-discharging": "{power:>1.0f}W↓ {capacity}%",
     "tooltip-format-charging": "{power:>1.0f}W↑ {capacity}%",
     "interval": 5,
-    "on-click": "omarchy-menu power",
+    "on-click": "foundationos-workstation-menu system",
     "states": {
       "warning": 20,
       "critical": 10

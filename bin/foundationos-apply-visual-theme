@@ -7,7 +7,7 @@ theme_name="${1:-foundationos-default}"
 theme_dir="$HOME/.config/omarchy/themes/$theme_name"
 
 if ! foundationos::has_cmd omarchy-theme-set; then
-  foundationos::die "omarchy-theme-set is not available on this workstation."
+  foundationos::die "The upstream theme command is not available on this workstation."
 fi
 
 if [[ ! -d $theme_dir ]]; then

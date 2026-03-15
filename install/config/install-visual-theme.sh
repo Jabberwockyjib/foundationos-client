@@ -122,7 +122,7 @@ if command -v omarchy-theme-set >/dev/null 2>&1; then
     foundationos_warn "FoundationOS theme assets were installed, but automatic theme activation failed."
   fi
 else
-  foundationos_warn "omarchy-theme-set is not available. Visual theme assets were staged only."
+  foundationos_warn "The upstream theme command is not available. Visual theme assets were staged only."
 fi
 
 foundationos_step "FoundationOS visual theme ready"

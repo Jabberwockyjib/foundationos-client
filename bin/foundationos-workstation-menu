@@ -1,0 +1,458 @@
+#!/bin/bash
+
+set -eEo pipefail
+source "$(dirname "$0")/foundationos-env"
+source "$FOUNDATIONOS_ROOT/lib/foundationos-ui.sh"
+
+back_to_exit=false
+
+back_to() {
+  local parent_menu="${1:-}"
+
+  if [[ $back_to_exit == true ]]; then
+    exit 0
+  fi
+
+  if [[ -n $parent_menu ]]; then
+    "$parent_menu"
+  else
+    show_main_menu
+  fi
+}
+
+show_font_menu() {
+  local current_font selected_font
+
+  current_font="$(foundationos::has_cmd omarchy-font-current && omarchy-font-current || true)"
+  selected_font="$(foundationos::ui::menu "FoundationOS Font" "$(omarchy-font-list)" "--width 360" "$current_font")"
+
+  if [[ $selected_font == "CNCLD" || -z $selected_font ]]; then
+    back_to show_style_menu
+    return 0
+  fi
+
+  omarchy-font-set "$selected_font"
+}
+
+show_style_menu() {
+  case "$(foundationos::ui::menu "FoundationOS Style" $'Theme\nBackground\nFont\nLock Screen\nScreensaver Text\nFastfetch Wordmark')" in
+    "Theme")
+      if foundationos::has_cmd omarchy-launch-walker; then
+        omarchy-launch-walker -m menus:omarchythemes --width 800 --minheight 400
+      else
+        foundationos::warn "Theme browser requires omarchy-launch-walker."
+      fi
+      ;;
+    "Background")
+      if foundationos::has_cmd omarchy-launch-walker; then
+        omarchy-launch-walker -m menus:omarchyBackgroundSelector --width 800 --minheight 400
+      else
+        foundationos::warn "Background browser requires omarchy-launch-walker."
+      fi
+      ;;
+    "Font")
+      show_font_menu
+      ;;
+    "Lock Screen")
+      foundationos::ui::open_in_editor "$HOME/.config/hypr/hyprlock.conf"
+      ;;
+    "Screensaver Text")
+      foundationos::ui::open_in_editor "$HOME/.config/omarchy/branding/screensaver.txt"
+      ;;
+    "Fastfetch Wordmark")
+      foundationos::ui::open_in_editor "$HOME/.config/foundationos/branding/about.txt"
+      ;;
+    *)
+      back_to show_main_menu
+      ;;
+  esac
+}
+
+show_security_menu() {
+  case "$(foundationos::ui::menu "FoundationOS Security" $'Fingerprint\nFIDO2')" in
+    "Fingerprint")
+      foundationos::ui::present_terminal "omarchy-setup-fingerprint"
+      ;;
+    "FIDO2")
+      foundationos::ui::present_terminal "omarchy-setup-fido2"
+      ;;
+    *)
+      back_to show_setup_menu
+      ;;
+  esac
+}
+
+show_config_menu() {
+  case "$(foundationos::ui::menu "FoundationOS Config" $'FoundationOS\nDefaults\nHyprland\nHypridle\nHyprlock\nHyprsunset\nSwayOSD\nWalker\nWaybar\nXCompose')" in
+    "FoundationOS")
+      foundationos::ui::open_in_editor "$HOME/.config/foundationos/foundationos.conf"
+      ;;
+    "Defaults")
+      foundationos::ui::open_in_editor "$HOME/.config/uwsm/default"
+      ;;
+    "Hyprland")
+      foundationos::ui::open_in_editor "$HOME/.config/hypr/hyprland.conf"
+      ;;
+    "Hypridle")
+      foundationos::ui::open_in_editor "$HOME/.config/hypr/hypridle.conf"
+      foundationos::has_cmd omarchy-restart-hypridle && omarchy-restart-hypridle
+      ;;
+    "Hyprlock")
+      foundationos::ui::open_in_editor "$HOME/.config/hypr/hyprlock.conf"
+      ;;
+    "Hyprsunset")
+      foundationos::ui::open_in_editor "$HOME/.config/hypr/hyprsunset.conf"
+      foundationos::has_cmd omarchy-restart-hyprsunset && omarchy-restart-hyprsunset
+      ;;
+    "SwayOSD")
+      foundationos::ui::open_in_editor "$HOME/.config/swayosd/config.toml"
+      foundationos::has_cmd omarchy-restart-swayosd && omarchy-restart-swayosd
+      ;;
+    "Walker")
+      foundationos::ui::open_in_editor "$HOME/.config/walker/config.toml"
+      foundationos::has_cmd foundationos-restart-launcher && foundationos-restart-launcher
+      ;;
+    "Waybar")
+      foundationos::ui::open_in_editor "$HOME/.config/waybar/config.jsonc"
+      foundationos::has_cmd omarchy-restart-waybar && omarchy-restart-waybar
+      ;;
+    "XCompose")
+      foundationos::ui::open_in_editor "$HOME/.XCompose"
+      foundationos::has_cmd omarchy-restart-xcompose && omarchy-restart-xcompose
+      ;;
+    *)
+      back_to show_setup_menu
+      ;;
+  esac
+}
+
+show_sleep_menu() {
+  local options
+
+  if [[ -f $HOME/.local/state/omarchy/toggles/suspend-off ]]; then
+    options="Enable Suspend"
+  else
+    options="Disable Suspend"
+  fi
+
+  if foundationos::has_cmd omarchy-hibernation-available && omarchy-hibernation-available; then
+    options="$options"$'\n'"Disable Hibernate"
+  else
+    options="$options"$'\n'"Enable Hibernate"
+  fi
+
+  case "$(foundationos::ui::menu "FoundationOS Sleep" "$options")" in
+    "Enable Suspend"|"Disable Suspend")
+      omarchy-toggle-suspend
+      ;;
+    "Enable Hibernate")
+      foundationos::ui::present_terminal "omarchy-hibernation-setup"
+      ;;
+    "Disable Hibernate")
+      foundationos::ui::present_terminal "omarchy-hibernation-remove"
+      ;;
+    *)
+      back_to show_setup_menu
+      ;;
+  esac
+}
+
+show_power_profile_menu() {
+  local current_profile selected_profile
+
+  current_profile="$(powerprofilesctl get 2>/dev/null || true)"
+  selected_profile="$(foundationos::ui::menu "FoundationOS Power Profile" "$(omarchy-powerprofiles-list)" "" "$current_profile")"
+
+  if [[ $selected_profile == "CNCLD" || -z $selected_profile ]]; then
+    back_to show_setup_menu
+    return 0
+  fi
+
+  powerprofilesctl set "$selected_profile"
+}
+
+show_setup_menu() {
+  local options="Audio"$'\n'"Wi-Fi"$'\n'"Bluetooth"$'\n'"Power Profile"$'\n'"Monitors"$'\n'"Keybindings"$'\n'"Key Remapping"$'\n'"DNS"$'\n'"Security"$'\n'"Config Files"$'\n'"Sleep Settings"
+
+  [[ -f $HOME/.config/hypr/input.conf ]] && options="$options"$'\n'"Input"
+
+  case "$(foundationos::ui::menu "FoundationOS Setup" "$options")" in
+    "Audio")
+      omarchy-launch-audio
+      ;;
+    "Wi-Fi")
+      omarchy-launch-wifi
+      ;;
+    "Bluetooth")
+      omarchy-launch-bluetooth
+      ;;
+    "Power Profile")
+      show_power_profile_menu
+      ;;
+    "Monitors")
+      foundationos::ui::open_in_editor "$HOME/.config/hypr/monitors.conf"
+      ;;
+    "Keybindings")
+      foundationos::ui::open_in_editor "$HOME/.config/hypr/bindings.conf"
+      ;;
+    "Input")
+      foundationos::ui::open_in_editor "$HOME/.config/hypr/input.conf"
+      ;;
+    "Key Remapping")
+      omarchy-setup-makima
+      foundationos::ui::open_in_editor "$HOME/.config/makima/AT Translated Set 2 keyboard.toml"
+      foundationos::has_cmd omarchy-restart-makima && omarchy-restart-makima
+      ;;
+    "DNS")
+      foundationos::ui::present_terminal "omarchy-setup-dns"
+      ;;
+    "Security")
+      show_security_menu
+      ;;
+    "Config Files")
+      show_config_menu
+      ;;
+    "Sleep Settings")
+      show_sleep_menu
+      ;;
+    *)
+      back_to show_main_menu
+      ;;
+  esac
+}
+
+show_refresh_defaults_menu() {
+  case "$(foundationos::ui::menu "FoundationOS Defaults" $'Hyprland\nHypridle\nHyprlock\nHyprsunset\nPlymouth\nSwayOSD\nTmux\nWalker\nWaybar')" in
+    "Hyprland")
+      foundationos::ui::present_terminal "omarchy-refresh-hyprland"
+      ;;
+    "Hypridle")
+      foundationos::ui::present_terminal "omarchy-refresh-hypridle"
+      ;;
+    "Hyprlock")
+      foundationos::ui::present_terminal "omarchy-refresh-hyprlock"
+      ;;
+    "Hyprsunset")
+      foundationos::ui::present_terminal "omarchy-refresh-hyprsunset"
+      ;;
+    "Plymouth")
+      foundationos::ui::present_terminal "omarchy-refresh-plymouth"
+      ;;
+    "SwayOSD")
+      foundationos::ui::present_terminal "omarchy-refresh-swayosd"
+      ;;
+    "Tmux")
+      foundationos::ui::present_terminal "omarchy-refresh-tmux"
+      ;;
+    "Walker")
+      foundationos::ui::present_terminal "omarchy-refresh-walker"
+      ;;
+    "Waybar")
+      foundationos::ui::present_terminal "omarchy-refresh-waybar"
+      ;;
+    *)
+      back_to show_update_menu
+      ;;
+  esac
+}
+
+show_restart_services_menu() {
+  case "$(foundationos::ui::menu "FoundationOS Restart" $'Hypridle\nHyprsunset\nSwayOSD\nLauncher\nWaybar')" in
+    "Hypridle")
+      omarchy-restart-hypridle
+      ;;
+    "Hyprsunset")
+      omarchy-restart-hyprsunset
+      ;;
+    "SwayOSD")
+      omarchy-restart-swayosd
+      ;;
+    "Launcher")
+      foundationos-restart-launcher
+      ;;
+    "Waybar")
+      omarchy-restart-waybar
+      ;;
+    *)
+      back_to show_update_menu
+      ;;
+  esac
+}
+
+show_hardware_services_menu() {
+  case "$(foundationos::ui::menu "FoundationOS Hardware" $'Audio\nWi-Fi\nBluetooth')" in
+    "Audio")
+      foundationos::ui::present_terminal "omarchy-restart-pipewire"
+      ;;
+    "Wi-Fi")
+      foundationos::ui::present_terminal "omarchy-restart-wifi"
+      ;;
+    "Bluetooth")
+      foundationos::ui::present_terminal "omarchy-restart-bluetooth"
+      ;;
+    *)
+      back_to show_update_menu
+      ;;
+  esac
+}
+
+show_password_menu() {
+  case "$(foundationos::ui::menu "FoundationOS Password" $'Drive Encryption\nUser Password')" in
+    "Drive Encryption")
+      foundationos::ui::present_terminal "omarchy-drive-set-password"
+      ;;
+    "User Password")
+      foundationos::ui::present_terminal "passwd"
+      ;;
+    *)
+      back_to show_update_menu
+      ;;
+  esac
+}
+
+show_update_menu() {
+  case "$(foundationos::ui::menu "FoundationOS Update" $'Client Plan\nApply Client Update\nApply Client + System Update\nUpstream Status\nRefresh Defaults\nRestart Services\nHardware Services\nTimezone\nTime Sync\nPassword')" in
+    "Client Plan")
+      foundationos::ui::present_terminal_notice "foundationos-update plan; printf '\n'; foundationos-diagnostics --summary"
+      ;;
+    "Apply Client Update")
+      foundationos::ui::present_terminal_notice "foundationos-update apply"
+      ;;
+    "Apply Client + System Update")
+      foundationos::ui::present_terminal_notice "foundationos-update apply --with-system"
+      ;;
+    "Upstream Status")
+      foundationos::ui::present_terminal_notice "foundationos-upstream-status --fetch"
+      ;;
+    "Refresh Defaults")
+      show_refresh_defaults_menu
+      ;;
+    "Restart Services")
+      show_restart_services_menu
+      ;;
+    "Hardware Services")
+      show_hardware_services_menu
+      ;;
+    "Timezone")
+      foundationos::ui::present_terminal "omarchy-tz-select"
+      ;;
+    "Time Sync")
+      foundationos::ui::present_terminal "omarchy-update-time"
+      ;;
+    "Password")
+      show_password_menu
+      ;;
+    *)
+      back_to show_main_menu
+      ;;
+  esac
+}
+
+show_about_menu() {
+  foundationos::ui::present_terminal_notice "cat \"$HOME/.config/foundationos/branding/about.txt\"; printf '\n'; foundationos-diagnostics --summary"
+}
+
+show_system_menu() {
+  local options="Lock Screen"$'\n'"Screensaver"
+
+  [[ ! -f $HOME/.local/state/omarchy/toggles/suspend-off ]] && options="$options"$'\n'"Suspend"
+
+  if foundationos::has_cmd omarchy-hibernation-available && omarchy-hibernation-available; then
+    options="$options"$'\n'"Hibernate"
+  fi
+
+  options="$options"$'\n'"Logout"$'\n'"Restart"$'\n'"Shutdown"
+
+  case "$(foundationos::ui::menu "FoundationOS Power" "$options")" in
+    "Lock Screen")
+      if foundationos::has_cmd omarchy-lock-screen; then
+        omarchy-lock-screen
+      else
+        loginctl lock-session
+      fi
+      ;;
+    "Screensaver")
+      omarchy-launch-screensaver force
+      ;;
+    "Suspend")
+      systemctl suspend
+      ;;
+    "Hibernate")
+      systemctl hibernate
+      ;;
+    "Logout")
+      if foundationos::has_cmd omarchy-system-logout; then
+        omarchy-system-logout
+      else
+        loginctl terminate-user "$USER"
+      fi
+      ;;
+    "Restart")
+      if foundationos::has_cmd omarchy-system-reboot; then
+        omarchy-system-reboot
+      else
+        systemctl reboot
+      fi
+      ;;
+    "Shutdown")
+      if foundationos::has_cmd omarchy-system-shutdown; then
+        omarchy-system-shutdown
+      else
+        systemctl poweroff
+      fi
+      ;;
+    *)
+      back_to show_main_menu
+      ;;
+  esac
+}
+
+show_main_menu() {
+  case "$(foundationos::ui::menu "FoundationOS Workstation" $'Desktop Style\nWorkstation Setup\nClient Update\nAbout Workstation\nPower')" in
+    "Desktop Style")
+      show_style_menu
+      ;;
+    "Workstation Setup")
+      show_setup_menu
+      ;;
+    "Client Update")
+      show_update_menu
+      ;;
+    "About Workstation")
+      show_about_menu
+      ;;
+    "Power")
+      show_system_menu
+      ;;
+    *)
+      exit 0
+      ;;
+  esac
+}
+
+foundationos::ui::toggle_existing_menu
+
+case "${1:-}" in
+  style)
+    back_to_exit=true
+    show_style_menu
+    ;;
+  setup)
+    back_to_exit=true
+    show_setup_menu
+    ;;
+  update)
+    back_to_exit=true
+    show_update_menu
+    ;;
+  system|power)
+    back_to_exit=true
+    show_system_menu
+    ;;
+  about)
+    show_about_menu
+    ;;
+  *)
+    show_main_menu
+    ;;
+esac

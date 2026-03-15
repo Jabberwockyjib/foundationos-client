@@ -38,11 +38,11 @@ while [[ $# -gt 0 ]]; do
 done
 
 if ! foundationos::has_cmd git; then
-  foundationos::die "git is required to stage an Omarchy-based VM tree."
+  foundationos::die "git is required to stage the upstream desktop base."
 fi
 
 if ! foundationos::has_cmd rsync; then
-  foundationos::die "rsync is required to stage an Omarchy-based VM tree."
+  foundationos::die "rsync is required to stage the upstream desktop base."
 fi
 
 if [[ -d $target_dir/.git ]]; then
@@ -56,7 +56,7 @@ else
     foundationos::log "Cloning local upstream checkout from $from_local"
     git clone --branch "$upstream_ref" "$from_local" "$target_dir"
   else
-    foundationos::log "Cloning upstream Omarchy from $upstream_repo"
+    foundationos::log "Cloning upstream desktop base from $upstream_repo"
     git clone --depth 1 --branch "$upstream_ref" "$upstream_repo" "$target_dir"
   fi
 fi

@@ -29,7 +29,7 @@ FoundationOS Update Plan
 - release id: $FOUNDATIONOS_RELEASE_ID
 - update manifest: $manifest_path
 - repo root: $FOUNDATIONOS_ROOT
-- snapshot support: $(foundationos::has_cmd omarchy-snapshot && echo omarchy-snapshot || foundationos::has_cmd snapper && echo snapper || echo unavailable)
+- snapshot support: $(foundationos::has_cmd omarchy-snapshot && echo delegated || foundationos::has_cmd snapper && echo snapper || echo unavailable)
 - delegated system update: $(foundationos::has_cmd omarchy-update && echo available || echo unavailable)
 EOF
 
@@ -50,7 +50,7 @@ EOF
 
     if [[ $with_system == true ]]; then
       if foundationos::has_cmd omarchy-update; then
-        foundationos::log "Running delegated Omarchy system update"
+        foundationos::log "Running delegated system update"
         omarchy-update -y
       else
         foundationos::warn "System update delegation requested, but omarchy-update is not available."
