@@ -1,0 +1,29 @@
+schema_version: v1
+release_id: foundationos-client-live-dev
+channel: pilot
+site_ref: production
+profile: production
+upstream:
+  repo: https://github.com/basecamp/omarchy.git
+  branch: dev
+builder:
+  script: iso/build-iso.sh
+  profile: production
+  platform: linux/amd64
+artifacts:
+  output_dir: out/iso
+  checksum: "<iso>.sha256"
+  metadata: "<iso>.json"
+embedded:
+  repo_root: /opt/foundationos-client
+  live_release_env: /etc/foundationos-release.env
+  live_config: /etc/foundationos-live.conf
+  commands:
+    - foundationos-live-release
+    - foundationos-live-stage
+    - foundationos-live-prepare
+blocked_by:
+  - direct disk installer workflow
+  - signed desktop-agent package artifact
+  - FreeIPA enrollment credentials or OTP issuance flow
+status: draft

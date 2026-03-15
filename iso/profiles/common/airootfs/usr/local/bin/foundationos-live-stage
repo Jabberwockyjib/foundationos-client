@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -eEo pipefail
+
+repo_dir="/opt/foundationos-client"
+target_dir="${1:-/root/foundationos-staging}"
+
+if [[ $EUID -ne 0 ]]; then
+  echo "Run foundationos-live-stage as root inside the live ISO environment." >&2
+  exit 1
+fi
+
+if [[ ! -x $repo_dir/bin/foundationos-vm-stage ]]; then
+  echo "Embedded FoundationOS client repo not found at $repo_dir" >&2
+  exit 1
+fi
+
+"$repo_dir/bin/foundationos-vm-stage" --target "$target_dir"
+
+cat <<EOF
+
+FoundationOS staging tree created at:
+  $target_dir
+
+This live ISO stages the upstream desktop base plus the FoundationOS overlay.
+It does not yet perform the direct disk install automatically.
+
+Runbook:
+  less /opt/foundationos-client/docs/HARDWARE-INSTALL.md
+
+EOF

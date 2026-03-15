@@ -1,0 +1,13 @@
+FoundationOS production live image
+
+Embedded repo:
+  /opt/foundationos-client
+
+Quick commands:
+  foundationos-live-release
+  foundationos-live-stage
+  less /opt/foundationos-client/docs/HARDWARE-INSTALL.md
+
+This image is the production live ISO build target.
+It is intended for publishable hardware validation and staged deployment work.
+It is not yet the direct installer ISO.

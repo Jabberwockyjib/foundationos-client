@@ -1,0 +1,11 @@
+[Unit]
+Description=Prepare FoundationOS live environment
+After=local-fs.target systemd-user-sessions.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/foundationos-live-prepare
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

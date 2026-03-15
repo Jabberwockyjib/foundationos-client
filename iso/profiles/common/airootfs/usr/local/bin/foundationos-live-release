@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -eEo pipefail
+
+release_file="/etc/foundationos-release.env"
+
+if [[ ! -f $release_file ]]; then
+  echo "FoundationOS release metadata is unavailable." >&2
+  exit 1
+fi
+
+# shellcheck disable=SC1090
+source "$release_file"
+
+cat <<EOF
+FoundationOS Live ISO
+- profile: ${FOUNDATIONOS_ISO_PROFILE:-unknown}
+- iso name: ${FOUNDATIONOS_ISO_NAME:-unknown}
+- release id: ${FOUNDATIONOS_RELEASE_ID:-unknown}
+- channel: ${FOUNDATIONOS_CHANNEL:-unknown}
+- site ref: ${FOUNDATIONOS_SITE_REF:-unknown}
+- built at: ${FOUNDATIONOS_BUILT_AT:-unknown}
+- source revision: ${FOUNDATIONOS_SOURCE_REVISION:-unknown}
+EOF

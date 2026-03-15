@@ -1,6 +1,8 @@
 FROM archlinux:base-devel
 
-RUN pacman -Syu --noconfirm \
+RUN sed -i '/^ParallelDownloads/a DisableSandbox' /etc/pacman.conf \
+  && pacman -Syy --noconfirm archlinux-keyring \
+  && pacman -Syu --noconfirm \
   archiso \
   git \
   rsync \
