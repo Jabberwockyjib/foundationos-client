@@ -3,7 +3,9 @@
 set -eEo pipefail
 
 if [[ -f $FOUNDATIONOS_INSTALL/packaging/upstream.sh ]]; then
+  pushd "$FOUNDATIONOS_INSTALL" >/dev/null
   source "$FOUNDATIONOS_INSTALL/packaging/upstream.sh"
+  popd >/dev/null
 fi
 
 run_logged "$FOUNDATIONOS_INSTALL/packaging/foundation-base.sh"
