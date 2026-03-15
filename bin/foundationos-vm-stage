@@ -9,6 +9,52 @@ upstream_ref="$FOUNDATIONOS_UPSTREAM_BRANCH"
 from_local=""
 run_install=false
 
+ref_exists() {
+  local repo_dir="$1"
+  local ref_name="$2"
+
+  git -C "$repo_dir" show-ref --verify --quiet "refs/heads/$ref_name" \
+    || git -C "$repo_dir" show-ref --verify --quiet "refs/remotes/origin/$ref_name" \
+    || git -C "$repo_dir" show-ref --verify --quiet "refs/remotes/upstream/$ref_name"
+}
+
+checkout_ref() {
+  local repo_dir="$1"
+  local ref_name="$2"
+
+  if git -C "$repo_dir" show-ref --verify --quiet "refs/heads/$ref_name"; then
+    git -C "$repo_dir" checkout "$ref_name"
+    return 0
+  fi
+
+  if git -C "$repo_dir" show-ref --verify --quiet "refs/remotes/origin/$ref_name"; then
+    git -C "$repo_dir" checkout -B "$ref_name" "origin/$ref_name"
+    return 0
+  fi
+
+  if git -C "$repo_dir" show-ref --verify --quiet "refs/remotes/upstream/$ref_name"; then
+    git -C "$repo_dir" checkout -B "$ref_name" "upstream/$ref_name"
+    return 0
+  fi
+
+  return 1
+}
+
+checkout_default_branch() {
+  local repo_dir="$1"
+  local remote_head
+
+  remote_head="$(git -C "$repo_dir" symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null || true)"
+
+  if [[ -n $remote_head ]]; then
+    git -C "$repo_dir" checkout -B "${remote_head#origin/}" "$remote_head"
+    return 0
+  fi
+
+  foundationos::warn "Unable to determine origin HEAD for $repo_dir. Keeping current checkout."
+  return 1
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --target)
@@ -47,18 +93,26 @@ fi
 
 if [[ -d $target_dir/.git ]]; then
   foundationos::log "Refreshing existing VM staging tree at $target_dir"
-  git -C "$target_dir" fetch origin "$upstream_ref" || true
-  git -C "$target_dir" checkout "$upstream_ref" || true
-  git -C "$target_dir" pull --ff-only || true
+  git -C "$target_dir" fetch --all --tags || true
 else
   rm -rf "$target_dir"
   if [[ -n $from_local ]]; then
     foundationos::log "Cloning local upstream checkout from $from_local"
-    git clone --branch "$upstream_ref" "$from_local" "$target_dir"
+    git clone "$from_local" "$target_dir"
   else
     foundationos::log "Cloning upstream desktop base from $upstream_repo"
     git clone --depth 1 --branch "$upstream_ref" "$upstream_repo" "$target_dir"
   fi
+fi
+
+if ! checkout_ref "$target_dir" "$upstream_ref"; then
+  foundationos::warn "Requested upstream ref '$upstream_ref' is unavailable in $target_dir."
+  checkout_default_branch "$target_dir" || true
+fi
+
+current_branch="$(git -C "$target_dir" branch --show-current 2>/dev/null || true)"
+if [[ -n $current_branch ]]; then
+  git -C "$target_dir" pull --ff-only || true
 fi
 
 for stage in preflight packaging config login post-install; do
